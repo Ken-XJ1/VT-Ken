@@ -1,0 +1,404 @@
+{
+  "metadata": {
+    "description": "Datos ambientales y climáticos de Quibdó, Chocó para vigilancia epidemiológica",
+    "source": "Instituto de Hidrología, Meteorología y Estudios Ambientales (IDEAM)",
+    "last_updated": "2024-01-15T12:00:00Z",
+    "station_id": "QUI-001",
+    "station_name": "Estación Meteorológica Quibdó",
+    "coordinates": {
+      "lat": 5.6945,
+      "lng": -76.6585,
+      "elevation_meters": 45
+    }
+  },
+  "current_conditions": {
+    "timestamp": "2024-01-15T12:00:00Z",
+    "temperature": {
+      "current_celsius": 28.5,
+      "feels_like_celsius": 32.1,
+      "min_celsius": 24.2,
+      "max_celsius": 31.8,
+      "trend": "stable"
+    },
+    "humidity": {
+      "current_percent": 85,
+      "min_percent": 78,
+      "max_percent": 92,
+      "trend": "increasing"
+    },
+    "precipitation": {
+      "current_mm": 0,
+      "last_24h_mm": 180,
+      "last_7d_mm": 890,
+      "monthly_mm": 420,
+      "probability_next_24h": 75
+    },
+    "wind": {
+      "speed_kmh": 8,
+      "direction_degrees": 245,
+      "direction_cardinal": "WSO",
+      "gusts_kmh": 15
+    },
+    "atmospheric_pressure": {
+      "hpa": 1012.5,
+      "trend": "falling"
+    },
+    "uv_index": {
+      "current": 9,
+      "max_today": 11,
+      "category": "very_high"
+    },
+    "visibility": {
+      "km": 8.5,
+      "condition": "good"
+    }
+  },
+  "vector_conditions": {
+    "timestamp": "2024-01-15T12:00:00Z",
+    "mosquito_activity_index": 0.82,
+    "breeding_sites_risk": "high",
+    "larvae_density": "moderate",
+    "adult_mosquito_density": "high",
+    "species_detected": [
+      {
+        "name": "Aedes aegypti",
+        "abundance": "high",
+        "diseases_transmitted": ["dengue", "zika", "chikungunya"]
+      },
+      {
+        "name": "Anopheles",
+        "abundance": "moderate",
+        "diseases_transmitted": ["malaria"]
+      },
+      {
+        "name": "Culex",
+        "abundance": "low",
+        "diseases_transmitted": []
+      }
+    ],
+    "control_measures": {
+      "fumigation_scheduled": true,
+      "last_fumigation_date": "2024-01-10",
+      "next_fumigation_date": "2024-01-17",
+      "larviciding_active": true,
+      "community_campaigns": 2
+    }
+  },
+  "daily_forecast": [
+    {
+      "date": "2024-01-15",
+      "temperature": {
+        "min_celsius": 24.2,
+        "max_celsius": 31.8,
+        "avg_celsius": 28.0
+      },
+      "humidity": {
+        "min_percent": 78,
+        "max_percent": 92,
+        "avg_percent": 85
+      },
+      "precipitation": {
+        "probability_percent": 75,
+        "expected_mm": 15,
+        "intensity": "moderate"
+      },
+      "wind": {
+        "speed_kmh": 8,
+        "direction": "WSO"
+      },
+      "mosquito_risk_index": 0.85,
+      "disease_transmission_risk": {
+        "dengue": "high",
+        "malaria": "moderate",
+        "zika": "moderate",
+        "chikungunya": "moderate"
+      }
+    },
+    {
+      "date": "2024-01-16",
+      "temperature": {
+        "min_celsius": 23.8,
+        "max_celsius": 31.2,
+        "avg_celsius": 27.5
+      },
+      "humidity": {
+        "min_percent": 80,
+        "max_percent": 94,
+        "avg_percent": 87
+      },
+      "precipitation": {
+        "probability_percent": 85,
+        "expected_mm": 25,
+        "intensity": "heavy"
+      },
+      "wind": {
+        "speed_kmh": 6,
+        "direction": "SW"
+      },
+      "mosquito_risk_index": 0.90,
+      "disease_transmission_risk": {
+        "dengue": "very_high",
+        "malaria": "high",
+        "zika": "high",
+        "chikungunya": "high"
+      }
+    },
+    {
+      "date": "2024-01-17",
+      "temperature": {
+        "min_celsius": 23.5,
+        "max_celsius": 30.8,
+        "avg_celsius": 27.2
+      },
+      "humidity": {
+        "min_percent": 82,
+        "max_percent": 95,
+        "avg_percent": 88
+      },
+      "precipitation": {
+        "probability_percent": 70,
+        "expected_mm": 12,
+        "intensity": "light"
+      },
+      "wind": {
+        "speed_kmh": 10,
+        "direction": "W"
+      },
+      "mosquito_risk_index": 0.88,
+      "disease_transmission_risk": {
+        "dengue": "high",
+        "malaria": "high",
+        "zika": "moderate",
+        "chikungunya": "moderate"
+      }
+    }
+  ],
+  "weekly_forecast": {
+    "week_start": "2024-01-15",
+    "week_end": "2024-01-21",
+    "summary": {
+      "temperature": {
+        "avg_min_celsius": 23.2,
+        "avg_max_celsius": 30.5,
+        "overall_avg_celsius": 26.8
+      },
+      "humidity": {
+        "avg_min_percent": 79,
+        "avg_max_percent": 93,
+        "overall_avg_percent": 86
+      },
+      "precipitation": {
+        "total_expected_mm": 145,
+        "rainy_days": 5,
+        "avg_daily_mm": 20.7
+      },
+      "mosquito_risk_trend": "increasing",
+      "epidemiological_alert_level": "moderate"
+    },
+    "risk_assessment": {
+      "dengue": {
+        "risk_level": "high",
+        "factors": ["high_humidity", "moderate_temperatures", "frequent_rain"],
+        "recommended_actions": ["intensify_surveillance", "prepare_resources", "community_awareness"]
+      },
+      "malaria": {
+        "risk_level": "moderate",
+        "factors": ["suitable_temperatures", "breeding_sites"],
+        "recommended_actions": ["monitor_vector_population", "maintain_prevention_measures"]
+      },
+      "zika": {
+        "risk_level": "moderate",
+        "factors": ["vector_presence", "environmental_conditions"],
+        "recommended_actions": ["continue_monitoring", "public_education"]
+      },
+      "chikungunya": {
+        "risk_level": "moderate",
+        "factors": ["vector_activity", "climate_conditions"],
+        "recommended_actions": ["vector_control", "surveillance"]
+      }
+    }
+  },
+  "historical_data": [
+    {
+      "date": "2024-01-14",
+      "temperature": {
+        "min_celsius": 24.0,
+        "max_celsius": 31.5,
+        "avg_celsius": 27.8
+      },
+      "humidity": {
+        "min_percent": 77,
+        "max_percent": 91,
+        "avg_percent": 84
+      },
+      "precipitation": {
+        "total_mm": 22,
+        "intensity": "moderate"
+      },
+      "mosquito_activity_index": 0.78
+    },
+    {
+      "date": "2024-01-13",
+      "temperature": {
+        "min_celsius": 24.5,
+        "max_celsius": 32.0,
+        "avg_celsius": 28.3
+      },
+      "humidity": {
+        "min_percent": 75,
+        "max_percent": 89,
+        "avg_percent": 82
+      },
+      "precipitation": {
+        "total_mm": 8,
+        "intensity": "light"
+      },
+      "mosquito_activity_index": 0.72
+    },
+    {
+      "date": "2024-01-12",
+      "temperature": {
+        "min_celsius": 24.8,
+        "max_celsius": 32.2,
+        "avg_celsius": 28.5
+      },
+      "humidity": {
+        "min_percent": 73,
+        "max_percent": 87,
+        "avg_percent": 80
+      },
+      "precipitation": {
+        "total_mm": 0,
+        "intensity": "none"
+      },
+      "mosquito_activity_index": 0.68
+    }
+  ],
+  "seasonal_patterns": {
+    "rainy_seasons": [
+      {
+        "name": "Primera temporada de lluvias",
+        "start_month": 4,
+        "end_month": 6,
+        "peak_months": [5],
+        "avg_precipitation_mm": 280,
+        "characteristics": ["high_humidity", "moderate_temperatures", "increased_vector_activity"]
+      },
+      {
+        "name": "Segunda temporada de lluvias",
+        "start_month": 10,
+        "end_month": 11,
+        "peak_months": [10],
+        "avg_precipitation_mm": 320,
+        "characteristics": ["very_high_humidity", "warm_temperatures", "peak_vector_activity"]
+      }
+    ],
+    "dry_seasons": [
+      {
+        "name": "Temporada seca",
+        "start_month": 12,
+        "end_month": 3,
+        "peak_months": [1, 2],
+        "avg_precipitation_mm": 120,
+        "characteristics": ["lower_humidity", "higher_temperatures", "reduced_vector_activity"]
+      },
+      {
+        "name": "Veranillo",
+        "start_month": 7,
+        "end_month": 9,
+        "peak_months": [8],
+        "avg_precipitation_mm": 150,
+        "characteristics": ["moderate_humidity", "high_temperatures", "moderate_vector_activity"]
+      }
+    ],
+    "disease_correlations": {
+      "dengue": {
+        "peak_season": "october_november",
+        "correlation_with_rainfall": 0.78,
+        "optimal_temperature_range": [26, 30],
+        "optimal_humidity_range": [80, 95]
+      },
+      "malaria": {
+        "peak_season": "april_june",
+        "correlation_with_rainfall": 0.72,
+        "optimal_temperature_range": [25, 28],
+        "optimal_humidity_range": [75, 90]
+      },
+      "zika": {
+        "peak_season": "october_november",
+        "correlation_with_rainfall": 0.65,
+        "optimal_temperature_range": [27, 31],
+        "optimal_humidity_range": [80, 95]
+      },
+      "chikungunya": {
+        "peak_season": "october_november",
+        "correlation_with_rainfall": 0.70,
+        "optimal_temperature_range": [26, 30],
+        "optimal_humidity_range": [80, 95]
+      }
+    }
+  },
+  "climate_change_indicators": {
+    "temperature_trend": {
+      "last_10_years_increase_celsius": 0.8,
+      "projected_2050_increase_celsius": 2.1,
+      "impact_on_disease_transmission": "moderate_to_high"
+    },
+    "precipitation_trend": {
+      "last_10_years_change_percent": -5,
+      "projected_2050_change_percent": -12,
+      "impact_on_disease_transmission": "variable"
+    },
+    "extreme_events": {
+      "flood_events_last_5_years": 3,
+      "drought_events_last_5_years": 1,
+      "heat_waves_last_5_years": 2,
+      "epidemiological_impact": "significant"
+    }
+  },
+  "monitoring_stations": [
+    {
+      "id": "QUI-001",
+      "name": "Estación Central Quibdó",
+      "location": "Centro",
+      "coordinates": {
+        "lat": 5.6945,
+        "lng": -76.6585
+      },
+      "status": "active",
+      "last_maintenance": "2024-01-01",
+      "sensors": ["temperature", "humidity", "precipitation", "wind", "pressure"]
+    },
+    {
+      "id": "QUI-002",
+      "name": "Estación El Pato",
+      "location": "El Pato",
+      "coordinates": {
+        "lat": 5.7000,
+        "lng": -76.6500
+      },
+      "status": "active",
+      "last_maintenance": "2024-01-05",
+      "sensors": ["temperature", "humidity", "precipitation"]
+    },
+    {
+      "id": "QUI-003",
+      "name": "Estación San Francisco",
+      "location": "San Francisco",
+      "coordinates": {
+        "lat": 5.7100,
+        "lng": -76.6700
+      },
+      "status": "maintenance",
+      "last_maintenance": "2023-12-15",
+      "sensors": ["temperature", "humidity", "precipitation", "wind"]
+    }
+  ],
+  "data_quality": {
+    "completeness_percent": 96.8,
+    "accuracy_percent": 94.2,
+    "timeliness_percent": 98.1,
+    "consistency_percent": 95.5,
+    "last_validation": "2024-01-15T06:00:00Z"
+  }
+}

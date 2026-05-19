@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enfermedades — Vigilancia Tropical</title>
+    <link rel="stylesheet" href="static/css/main.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container nav-inner">
+            <a href="index.html" class="logo">Vigilancia <span>Tropical</span></a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="mapa.html">Mapa</a></li>
+                    <li><a href="prediccion.html">Predicción</a></li>
+                    <li><a href="enfermedades.html" class="active">Enfermedades</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page-hero">
+            <h1>Fichas de enfermedades</h1>
+            <p>Información de vigilancia epidemiológica para dengue, malaria, zika y chikungunya en el Pacífico colombiano.</p>
+        </section>
+
+        <div id="enfermedades-loading" class="loading">Cargando fichas…</div>
+        <div id="enfermedades-error" class="error-msg" style="display:none;"></div>
+        <div id="enfermedades-list" class="disease-list"></div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p><strong>Vigilancia Tropical</strong> — Referencia clínica · Chocó</p>
+        </div>
+    </footer>
+
+    <script src="static/js/api.js"></script>
+    <script src="static/js/enfermedades.js"></script>
+</body>
+</html>

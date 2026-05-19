@@ -1,0 +1,490 @@
+{
+  "metadata": {
+    "description": "Datos epidemiológicos de enfermedades tropicales en Quibdó, Chocó",
+    "last_updated": "2024-01-15T10:30:00Z",
+    "source": "Secretaría de Salud de Quibdó",
+    "version": "1.0.0",
+    "date_range": {
+      "start": "2023-10-01",
+      "end": "2024-01-15"
+    }
+  },
+  "diseases": [
+    {
+      "id": "dengue",
+      "name": "Dengue",
+      "code": "A90",
+      "description": "Fiebre del dengue",
+      "vector": "Aedes aegypti",
+      "incubation_period_days": 4,
+      "transmission_period_days": 7
+    },
+    {
+      "id": "malaria",
+      "name": "Malaria",
+      "code": "B54",
+      "description": "Paludismo",
+      "vector": "Anopheles",
+      "incubation_period_days": 10,
+      "transmission_period_days": 14
+    },
+    {
+      "id": "zika",
+      "name": "Zika",
+      "code": "A928",
+      "description": "Fiebre por Zika",
+      "vector": "Aedes aegypti",
+      "incubation_period_days": 3,
+      "transmission_period_days": 7
+    },
+    {
+      "id": "chikungunya",
+      "name": "Chikungunya",
+      "code": "A921",
+      "description": "Fiebre de Chikungunya",
+      "vector": "Aedes aegypti",
+      "incubation_period_days": 4,
+      "transmission_period_days": 10
+    }
+  ],
+  "locations": [
+    {
+      "id": "centro",
+      "name": "Centro",
+      "coordinates": {
+        "lat": 5.6945,
+        "lng": -76.6585
+      },
+      "population": 15000,
+      "health_centers": 3,
+      "risk_level": "medium"
+    },
+    {
+      "id": "el_pato",
+      "name": "El Pato",
+      "coordinates": {
+        "lat": 5.7000,
+        "lng": -76.6500
+      },
+      "population": 8000,
+      "health_centers": 1,
+      "risk_level": "high"
+    },
+    {
+      "id": "la_esperanza",
+      "name": "La Esperanza",
+      "coordinates": {
+        "lat": 5.6800,
+        "lng": -76.6600
+      },
+      "population": 6000,
+      "health_centers": 1,
+      "risk_level": "low"
+    },
+    {
+      "id": "san_francisco",
+      "name": "San Francisco",
+      "coordinates": {
+        "lat": 5.7100,
+        "lng": -76.6700
+      },
+      "population": 12000,
+      "health_centers": 2,
+      "risk_level": "high"
+    },
+    {
+      "id": "barrio_obrero",
+      "name": "Barrio Obrero",
+      "coordinates": {
+        "lat": 5.6900,
+        "lng": -76.6400
+      },
+      "population": 9000,
+      "health_centers": 1,
+      "risk_level": "medium"
+    }
+  ],
+  "daily_records": [
+    {
+      "date": "2024-01-15",
+      "records": [
+        {
+          "disease": "dengue",
+          "location": "centro",
+          "cases": 15,
+          "confirmed": 12,
+          "suspected": 3,
+          "age_groups": {
+            "0-4": 2,
+            "5-14": 4,
+            "15-44": 6,
+            "45-64": 2,
+            "65+": 1
+          },
+          "gender": {
+            "male": 8,
+            "female": 7
+          },
+          "severity": {
+            "mild": 10,
+            "moderate": 4,
+            "severe": 1
+          },
+          "environmental_factors": {
+            "temperature_celsius": 28.5,
+            "humidity_percent": 85,
+            "rainfall_mm": 180,
+            "vector_index": 0.75
+          }
+        },
+        {
+          "disease": "dengue",
+          "location": "el_pato",
+          "cases": 8,
+          "confirmed": 6,
+          "suspected": 2,
+          "age_groups": {
+            "0-4": 1,
+            "5-14": 3,
+            "15-44": 3,
+            "45-64": 1,
+            "65+": 0
+          },
+          "gender": {
+            "male": 4,
+            "female": 4
+          },
+          "severity": {
+            "mild": 6,
+            "moderate": 2,
+            "severe": 0
+          },
+          "environmental_factors": {
+            "temperature_celsius": 29.0,
+            "humidity_percent": 87,
+            "rainfall_mm": 195,
+            "vector_index": 0.82
+          }
+        },
+        {
+          "disease": "malaria",
+          "location": "el_pato",
+          "cases": 20,
+          "confirmed": 18,
+          "suspected": 2,
+          "age_groups": {
+            "0-4": 1,
+            "5-14": 5,
+            "15-44": 10,
+            "45-64": 3,
+            "65+": 1
+          },
+          "gender": {
+            "male": 12,
+            "female": 8
+          },
+          "severity": {
+            "mild": 8,
+            "moderate": 10,
+            "severe": 2
+          },
+          "environmental_factors": {
+            "temperature_celsius": 29.0,
+            "humidity_percent": 87,
+            "rainfall_mm": 195,
+            "vector_index": 0.82
+          }
+        },
+        {
+          "disease": "zika",
+          "location": "centro",
+          "cases": 3,
+          "confirmed": 2,
+          "suspected": 1,
+          "age_groups": {
+            "0-4": 0,
+            "5-14": 1,
+            "15-44": 2,
+            "45-64": 0,
+            "65+": 0
+          },
+          "gender": {
+            "male": 1,
+            "female": 2
+          },
+          "severity": {
+            "mild": 3,
+            "moderate": 0,
+            "severe": 0
+          },
+          "environmental_factors": {
+            "temperature_celsius": 28.5,
+            "humidity_percent": 85,
+            "rainfall_mm": 180,
+            "vector_index": 0.75
+          }
+        },
+        {
+          "disease": "chikungunya",
+          "location": "san_francisco",
+          "cases": 7,
+          "confirmed": 5,
+          "suspected": 2,
+          "age_groups": {
+            "0-4": 0,
+            "5-14": 2,
+            "15-44": 4,
+            "45-64": 1,
+            "65+": 0
+          },
+          "gender": {
+            "male": 3,
+            "female": 4
+          },
+          "severity": {
+            "mild": 4,
+            "moderate": 3,
+            "severe": 0
+          },
+          "environmental_factors": {
+            "temperature_celsius": 27.8,
+            "humidity_percent": 83,
+            "rainfall_mm": 165,
+            "vector_index": 0.68
+          }
+        }
+      ]
+    },
+    {
+      "date": "2024-01-14",
+      "records": [
+        {
+          "disease": "dengue",
+          "location": "centro",
+          "cases": 12,
+          "confirmed": 10,
+          "suspected": 2,
+          "age_groups": {
+            "0-4": 1,
+            "5-14": 3,
+            "15-44": 5,
+            "45-64": 2,
+            "65+": 1
+          },
+          "gender": {
+            "male": 6,
+            "female": 6
+          },
+          "severity": {
+            "mild": 8,
+            "moderate": 3,
+            "severe": 1
+          },
+          "environmental_factors": {
+            "temperature_celsius": 28.2,
+            "humidity_percent": 84,
+            "rainfall_mm": 175,
+            "vector_index": 0.72
+          }
+        },
+        {
+          "disease": "malaria",
+          "location": "san_francisco",
+          "cases": 15,
+          "confirmed": 13,
+          "suspected": 2,
+          "age_groups": {
+            "0-4": 1,
+            "5-14": 4,
+            "15-44": 7,
+            "45-64": 2,
+            "65+": 1
+          },
+          "gender": {
+            "male": 9,
+            "female": 6
+          },
+          "severity": {
+            "mild": 6,
+            "moderate": 7,
+            "severe": 2
+          },
+          "environmental_factors": {
+            "temperature_celsius": 27.8,
+            "humidity_percent": 83,
+            "rainfall_mm": 165,
+            "vector_index": 0.68
+          }
+        }
+      ]
+    }
+  ],
+  "weekly_aggregates": [
+    {
+      "week": "2024-W02",
+      "start_date": "2024-01-08",
+      "end_date": "2024-01-14",
+      "summary": {
+        "total_cases": 156,
+        "by_disease": {
+          "dengue": 68,
+          "malaria": 52,
+          "zika": 18,
+          "chikungunya": 18
+        },
+        "by_location": {
+          "centro": 45,
+          "el_pato": 38,
+          "la_esperanza": 12,
+          "san_francisco": 42,
+          "barrio_obrero": 19
+        },
+        "severity_distribution": {
+          "mild": 98,
+          "moderate": 45,
+          "severe": 13
+        },
+        "age_distribution": {
+          "0-4": 12,
+          "5-14": 38,
+          "15-44": 72,
+          "45-64": 25,
+          "65+": 9
+        },
+        "environmental_averages": {
+          "temperature_celsius": 28.3,
+          "humidity_percent": 84.5,
+          "rainfall_mm": 178.2,
+          "vector_index": 0.74
+        }
+      }
+    },
+    {
+      "week": "2024-W01",
+      "start_date": "2024-01-01",
+      "end_date": "2024-01-07",
+      "summary": {
+        "total_cases": 142,
+        "by_disease": {
+          "dengue": 62,
+          "malaria": 48,
+          "zika": 16,
+          "chikungunya": 16
+        },
+        "by_location": {
+          "centro": 41,
+          "el_pato": 35,
+          "la_esperanza": 10,
+          "san_francisco": 38,
+          "barrio_obrero": 18
+        },
+        "severity_distribution": {
+          "mild": 89,
+          "moderate": 41,
+          "severe": 12
+        },
+        "age_distribution": {
+          "0-4": 11,
+          "5-14": 35,
+          "15-44": 65,
+          "45-64": 23,
+          "65+": 8
+        },
+        "environmental_averages": {
+          "temperature_celsius": 28.1,
+          "humidity_percent": 84.0,
+          "rainfall_mm": 175.5,
+          "vector_index": 0.73
+        }
+      }
+    }
+  ],
+  "alerts": [
+    {
+      "id": "alert_001",
+      "type": "outbreak_warning",
+      "severity": "medium",
+      "disease": "dengue",
+      "location": "el_pato",
+      "title": "Aumento de casos de dengue en El Pato",
+      "description": "Se ha observado un aumento del 35% en los casos de dengue en la última semana en el sector de El Pato",
+      "date_issued": "2024-01-15T08:00:00Z",
+      "valid_until": "2024-01-22T08:00:00Z",
+      "recommended_actions": [
+        "Intensificar fumigación en el área",
+        "Realizar campaña de concientización",
+        "Fortalecer vigilancia clínica",
+        "Distribuir repelentes y mosquiteros"
+      ],
+      "contact": {
+        "person": "Dr. Carlos Mendez",
+        "position": "Coordinador de Vigilancia",
+        "phone": "+57 6 1234567",
+        "email": "cmendez@saludquibdo.gov.co"
+      }
+    },
+    {
+      "id": "alert_002",
+      "type": "environmental_risk",
+      "severity": "low",
+      "disease": "malaria",
+      "location": "san_francisco",
+      "title": "Condiciones ambientales favorables para malaria",
+      "description": "Las condiciones climáticas actuales (alta humedad y precipitaciones) son favorables para la proliferación de vectores de malaria",
+      "date_issued": "2024-01-14T14:30:00Z",
+      "valid_until": "2024-01-21T14:30:00Z",
+      "recommended_actions": [
+        "Vigilancia entomológica intensificada",
+        "Educación comunitaria sobre prevención",
+        "Verificar disponibilidad de tratamientos"
+      ],
+      "contact": {
+        "person": "Dra. Maria Rodriguez",
+        "position": "Especialista en Medicina Tropical",
+        "phone": "+57 6 7654321",
+        "email": "mrodriguez@saludquibdo.gov.co"
+      }
+    }
+  ],
+  "health_resources": {
+    "personnel": {
+      "doctors": 15,
+      "nurses": 28,
+      "health_technicians": 22,
+      "community_health_workers": 35
+    },
+    "facilities": {
+      "hospitals": 1,
+      "health_centers": 8,
+      "mobile_clinics": 3,
+      "diagnostic_labs": 2
+    },
+    "supplies": {
+      "diagnostic_kits": {
+        "dengue": 150,
+        "malaria": 200,
+        "zika": 80,
+        "chikungunya": 80
+      },
+      "treatments": {
+        "antimalarials": 500,
+        "analgesics": 1000,
+        "antipyretics": 800,
+        "intravenous_fluids": 200
+      },
+      "prevention": {
+        "insecticide": 50,
+        "repellent_bottles": 300,
+        "mosquito_nets": 150,
+        "larvicides": 30
+      }
+    }
+  },
+  "quality_metrics": {
+    "data_completeness": 94.5,
+    "reporting_timeliness": 88.2,
+    "diagnostic_accuracy": 92.1,
+    "geographic_coverage": 96.3,
+    "last_updated": "2024-01-15T10:30:00Z"
+  }
+}
