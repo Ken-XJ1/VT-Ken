@@ -1,0 +1,76 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(13, 13, 13, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 0;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.navbar-logo em {
+  font-style: normal;
+  color: var(--red2);
+}
+
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--red);
+  flex-shrink: 0;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 0.2rem;
+  list-style: none;
+}
+
+.navbar-links a {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: all var(--transition);
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: var(--text);
+  background: var(--dark3);
+}
+
+.navbar-links a.active {
+  color: var(--red2);
+}
+
+.navbar-cta {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .navbar-cta {
+    display: none;
+  }
+}

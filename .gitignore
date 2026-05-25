@@ -20,11 +20,15 @@ build/
 .DS_Store
 Thumbs.db
 
+# React frontend
+frontend/node_modules/
+frontend/dist/
+
 # Logs y temporales
 *.log
 /tmp/
 nohup.out
 
-# Base de datos local (si exportas dumps)
+# Base de datos local
 *.sql.backup
 dump.sql

@@ -1,0 +1,114 @@
+.mapa-page {
+  padding-bottom: 3rem;
+}
+
+.filter-chips-wrap {
+  flex: 1;
+  min-width: 200px;
+}
+
+.disease-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  padding: 0.45rem 1rem;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--dark3);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--transition);
+}
+
+.chip:hover,
+.chip.active {
+  color: var(--text);
+}
+
+.chip-all.active {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--red2);
+}
+
+.chip-dengue.active {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: #c0392b;
+  color: #e74c3c;
+}
+
+.chip-malaria.active {
+  background: rgba(230, 126, 34, 0.15);
+  border-color: #e67e22;
+  color: #e67e22;
+}
+
+.chip-zika.active {
+  background: rgba(52, 152, 219, 0.15);
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.chip-chikungunya.active {
+  background: rgba(39, 174, 96, 0.15);
+  border-color: #27ae60;
+  color: #27ae60;
+}
+
+.mapa-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .mapa-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-wrap {
+  min-height: 520px;
+}
+
+.map-container {
+  height: 520px;
+  width: 100%;
+}
+
+.legend-list {
+  list-style: none;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+.map-resumen {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

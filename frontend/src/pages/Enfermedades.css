@@ -1,0 +1,70 @@
+.enfermedades-page {
+  padding-bottom: 3rem;
+}
+
+.fichas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ficha {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.ficha-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ficha-dengue .ficha-header {
+  border-left: 4px solid #c0392b;
+}
+
+.ficha-malaria .ficha-header {
+  border-left: 4px solid #e67e22;
+}
+
+.ficha-zika .ficha-header {
+  border-left: 4px solid #3498db;
+}
+
+.ficha-chikungunya .ficha-header {
+  border-left: 4px solid #27ae60;
+}
+
+.ficha-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.ficha-desc {
+  padding: 1rem 1.75rem 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.ficha-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  padding: 1.25rem 1.75rem 1.5rem;
+}
+
+.ficha-block h4 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--red2);
+  margin-bottom: 0.45rem;
+}
+
+.ficha-block p {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}

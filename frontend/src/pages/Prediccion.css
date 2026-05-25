@@ -1,0 +1,167 @@
+.prediccion-page {
+  padding-bottom: 3rem;
+}
+
+.pred-dashboard {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .pred-dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gauge-panel {
+  text-align: center;
+}
+
+.risk-gauge {
+  position: relative;
+  width: 200px;
+  margin: 0 auto 1rem;
+}
+
+.gauge-ring {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.gauge-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-pct {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.gauge-level {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.gauge-meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.risk-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.risk-card {
+  background: var(--dark2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  border-left: 4px solid var(--mid);
+}
+
+.risk-card.nivel-bajo {
+  border-left-color: var(--riesgo-bajo, #27ae60);
+}
+
+.risk-card.nivel-medio {
+  border-left-color: #f39c12;
+}
+
+.risk-card.nivel-alto {
+  border-left-color: #e74c3c;
+}
+
+.risk-card.nivel-critico {
+  border-left-color: #c0392b;
+}
+
+.risk-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.risk-card h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.risk-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.risk-bar {
+  height: 8px;
+  background: var(--mid);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+.risk-pct {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.clima-panel {
+  margin-top: 0.5rem;
+}
+
+.clima-intro {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.clima-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+}
+
+.clima-stat {
+  background: var(--dark3);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  text-align: center;
+}
+
+.clima-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--red2);
+}
+
+.clima-unit {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
