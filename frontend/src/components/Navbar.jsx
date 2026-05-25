@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function VirusIcon() {
   return (
     <svg
-      className="w-7 h-7 text-red-500"
+      className="w-7 h-7 text-emerald-500"
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -33,12 +34,13 @@ function VirusIcon() {
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
-    isActive ? 'text-red-400' : 'text-gray-300 hover:text-white'
+    isActive ? 'text-emerald-400' : 'text-[#9ca3af] hover:text-[#f9fafb]'
   }`;
 
 export default function Navbar() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -46,19 +48,19 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-700">
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-gray-900/80 border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-white font-bold text-lg shrink-0">
           <VirusIcon />
           <span className="hidden sm:inline">
-            Vigilancia <span className="text-red-400 italic">Tropical</span>
+            Vigilancia <span className="text-emerald-400 italic">Tropical</span>
           </span>
         </Link>
 
-        {/* Nav links — varían según estado de auth */}
-        <nav aria-label="Navegación principal" className="flex-1">
-          <ul className="hidden md:flex items-center gap-5">
+        {/* Desktop Nav */}
+        <nav aria-label="Navegación principal" className="hidden md:flex flex-1">
+          <ul className="flex items-center gap-5">
             <li><NavLink to="/" end className={linkClass}>Inicio</NavLink></li>
             <li><NavLink to="/mapa" className={linkClass}>Mapa</NavLink></li>
             <li><NavLink to="/prediccion" className={linkClass}>Predicción</NavLink></li>
@@ -93,38 +95,101 @@ export default function Navbar() {
           </ul>
         </nav>
 
-        {/* Acciones de sesión */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
           {!isAuthenticated ? (
             <>
               <Link
                 to="/login"
-                className="text-sm font-medium text-gray-300 hover:text-white transition-colors px-3 py-2"
+                className="text-sm font-medium text-[#9ca3af] hover:text-[#f9fafb] transition-colors px-3 py-2"
               >
                 Iniciar sesión
               </Link>
               <Link
                 to="/registro"
-                className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
               >
                 Registrarse
               </Link>
             </>
           ) : (
             <>
-              <span className="hidden sm:block text-sm text-gray-400 max-w-32 truncate">
+              <span className="text-sm text-[#9ca3af] max-w-32 truncate">
                 {user?.nombre}
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm font-medium text-gray-400 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
+                className="text-sm font-medium text-[#9ca3af] hover:text-[#f9fafb] border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
               >
                 Cerrar sesión
               </button>
             </>
           )}
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden text-[#f9fafb] p-2"
+          aria-label="Menú"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {mobileOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-gray-800 bg-gray-900/95 backdrop-blur-md">
+          <nav className="px-4 py-4 space-y-2">
+            <NavLink to="/" end onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Inicio</NavLink>
+            <NavLink to="/mapa" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Mapa</NavLink>
+            <NavLink to="/prediccion" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Predicción</NavLink>
+            <NavLink to="/enfermedades" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Enfermedades</NavLink>
+            <NavLink to="/chatbot" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Asistente</NavLink>
+            
+            {isAuthenticated && !isAdmin && (
+              <>
+                <NavLink to="/dashboard" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Mi panel</NavLink>
+                <NavLink to="/reportar" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Reportar</NavLink>
+                <NavLink to="/mensajes" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Mensajes</NavLink>
+              </>
+            )}
+
+            {isAdmin && (
+              <>
+                <NavLink to="/admin" onClick={() => setMobileOpen(false)} className="block py-2 text-red-400 font-bold">Panel Admin</NavLink>
+                <NavLink to="/admin/reportes" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Reportes</NavLink>
+                <NavLink to="/admin/mensajes" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Mensajes</NavLink>
+                <NavLink to="/admin/usuarios" onClick={() => setMobileOpen(false)} className="block py-2 text-[#9ca3af] hover:text-[#f9fafb]">Usuarios</NavLink>
+              </>
+            )}
+
+            {!isAuthenticated ? (
+              <div className="pt-4 space-y-2">
+                <Link to="/login" onClick={() => setMobileOpen(false)} className="block py-2 text-center border border-gray-600 rounded-lg text-[#f9fafb]">
+                  Iniciar sesión
+                </Link>
+                <Link to="/registro" onClick={() => setMobileOpen(false)} className="block py-2 text-center bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg text-white font-medium">
+                  Registrarse
+                </Link>
+              </div>
+            ) : (
+              <button
+                onClick={() => { handleLogout(); setMobileOpen(false); }}
+                className="block w-full py-2 text-left text-[#9ca3af] hover:text-[#f9fafb] mt-4"
+              >
+                Cerrar sesión
+              </button>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

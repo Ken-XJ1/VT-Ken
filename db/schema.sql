@@ -109,10 +109,10 @@ CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes_sintomas(estado);
 CREATE INDEX IF NOT EXISTS idx_mensajes_usuario ON mensajes(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_mensajes_leido ON mensajes(leido);
 
--- Usuario admin por defecto (password: Admin2026*)
+-- Usuario admin por defecto (password: Tropical2026)
 INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES
-('Administrador', 'admin@vigilanciatropical.co',
- '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMxM8WPbMQCgMp7RK5B.Kn7qKi', 'admin')
+('Admin', 'admin@vt.co',
+ '$2b$12$vw3396fZhLzKN81f1/O9R.aQaNaborb2WDvnELjTGHnCMOnBz6mMi', 'admin')
 ON CONFLICT (email) DO NOTHING;
 
 -- Municipios: Quibdó e Istmina

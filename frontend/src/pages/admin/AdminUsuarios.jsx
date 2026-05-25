@@ -40,15 +40,15 @@ export default function AdminUsuarios() {
         {error && <p className="text-red-400 bg-red-900/20 border border-red-800 rounded-lg px-4 py-3 mb-4">{error}</p>}
 
         {!loading && (
-          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+          <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Nombre</th>
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 hidden md:table-cell">Email</th>
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Rol</th>
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 hidden sm:table-cell">Registro</th>
-                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3">Estado</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Nombre</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 hidden md:table-cell whitespace-nowrap">Email</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Rol</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 hidden sm:table-cell whitespace-nowrap">Registro</th>
+                  <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-4 py-3 whitespace-nowrap">Estado</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -57,7 +57,7 @@ export default function AdminUsuarios() {
                   const esAdmin = u.email === 'admin@vigilanciatropical.co';
                   return (
                     <tr key={u.id} className="border-b border-gray-700 last:border-0 hover:bg-gray-750">
-                      <td className="px-4 py-3 text-white font-medium">{u.nombre}</td>
+                      <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{u.nombre}</td>
                       <td className="px-4 py-3 text-gray-300 hidden md:table-cell">{u.email}</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -66,7 +66,7 @@ export default function AdminUsuarios() {
                           {u.rol}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">
+                      <td className="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell whitespace-nowrap">
                         {u.fecha_registro?.slice(0, 10)}
                       </td>
                       <td className="px-4 py-3">
@@ -76,7 +76,7 @@ export default function AdminUsuarios() {
                           {u.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
                         {!esAdmin && (
                           <button
                             onClick={() => handleToggle(u)}

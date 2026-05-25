@@ -268,6 +268,18 @@ def health():
         return jsonify({"status": "error", "database": str(e)}), 503
 
 
+@app.get("/api/admin/reset-password")
+def admin_reset_password():
+    """Endpoint temporal de desarrollo para generar hash de contraseña"""
+    password = "Tropical2026"
+    hash_generated = bcrypt.hashpw(password.encode(), bcrypt.gensalt(12)).decode()
+    return jsonify({
+        "password": password,
+        "hash": hash_generated,
+        "note": "Usar este hash en schema.sql o ejecutar UPDATE directo en BD"
+    })
+
+
 # ---------------------------------------------------------------------------
 # Autenticación
 # ---------------------------------------------------------------------------

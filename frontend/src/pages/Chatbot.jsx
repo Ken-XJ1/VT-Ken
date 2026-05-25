@@ -3,6 +3,25 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // ---------------------------------------------------------------------------
+// Componente de animación de escritura
+// ---------------------------------------------------------------------------
+
+function BurbujaEscribiendo() {
+  return (
+    <div className="flex gap-3 items-start">
+      <div className="w-8 h-8 rounded-full bg-red-900/50 border border-red-700 flex items-center justify-center shrink-0 mt-0.5">
+        <span className="text-red-400 text-xs font-bold">VT</span>
+      </div>
+      <div className="bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1">
+        <span className="typing-dot"></span>
+        <span className="typing-dot"></span>
+        <span className="typing-dot"></span>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Árbol de decisiones
 // ---------------------------------------------------------------------------
 
@@ -140,9 +159,12 @@ const RECOMENDACIONES = [
 // Componentes de burbuja
 // ---------------------------------------------------------------------------
 
-function BurbujaBot({ texto, ficha }) {
+function BurbujaBot({ texto, ficha, fadeIn }) {
   return (
-    <div className="flex gap-3 items-start">
+    <div 
+      className="flex gap-3 items-start"
+      style={fadeIn ? { animation: 'fadeIn 0.3s ease-in' } : {}}
+    >
       <div className="w-8 h-8 rounded-full bg-red-900/50 border border-red-700 flex items-center justify-center shrink-0 mt-0.5">
         <span className="text-red-400 text-xs font-bold">VT</span>
       </div>
@@ -163,9 +185,12 @@ function BurbujaBot({ texto, ficha }) {
   );
 }
 
-function BurbujaUsuario({ texto }) {
+function BurbujaUsuario({ texto, fadeIn }) {
   return (
-    <div className="flex justify-end">
+    <div 
+      className="flex justify-end"
+      style={fadeIn ? { animation: 'fadeIn 0.3s ease-in' } : {}}
+    >
       <div className="bg-red-700 rounded-2xl rounded-tr-sm px-4 py-3 text-sm text-white max-w-xs leading-relaxed">
         {texto}
       </div>
@@ -182,54 +207,114 @@ export default function Chatbot() {
   const [mensajes, setMensajes] = useState([]);
   const [nodoActual, setNodoActual] = useState('inicio');
   const [finalizado, setFinalizado] = useState(false);
+  const [escribiendo, setEscribiendo] = useState(false);
+  const [mostrarOpciones, setMostrarOpciones] = useState(false);
   const bottomRef = useRef(null);
+
+  // Función para calcular delay según longitud del mensaje
+  function calcularDelay(texto) {
+    if (!texto) return 800;
+    const longitud = texto.length;
+    if (longitud < 100) return 800;
+    if (longitud < 200) return 1400;
+    return 2000;
+  }
+
+  // Función para agregar mensaje del bot con efecto de escritura
+  function agregarMensajeBot(texto, ficha) {
+    setEscribiendo(true);
+    setMostrarOpciones(false);
+    
+    const delay = calcularDelay(texto || (ficha ? FICHAS[ficha].texto : ''));
+    
+    setTimeout(() => {
+      setMensajes((prev) => [...prev, { tipo: 'bot', texto, ficha, fadeIn: true }]);
+      setEscribiendo(false);
+      
+      // Mostrar opciones con delay adicional
+      setTimeout(() => {
+        setMostrarOpciones(true);
+      }, 300);
+    }, delay);
+  }
 
   // Mensaje inicial del bot
   useEffect(() => {
     const nodo = NODOS.inicio;
-    setMensajes([
-      {
-        tipo: 'bot',
-        texto: 'Hola, soy el asistente de Vigilancia Tropical. Puedo ayudarte a identificar posibles enfermedades tropicales según tus síntomas.',
-      },
-      { tipo: 'bot', texto: nodo.bot, ficha: nodo.ficha },
-    ]);
+    
+    // Primer mensaje de bienvenida
+    setEscribiendo(true);
+    setTimeout(() => {
+      setMensajes([
+        {
+          tipo: 'bot',
+          texto: 'Hola, soy el asistente de Vigilancia Tropical. Puedo ayudarte a identificar posibles enfermedades tropicales según tus síntomas.',
+          fadeIn: true,
+        },
+      ]);
+      setEscribiendo(false);
+      
+      // Segundo mensaje con la primera pregunta
+      setTimeout(() => {
+        agregarMensajeBot(nodo.bot, nodo.ficha);
+      }, 500);
+    }, 1400);
   }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [mensajes]);
+  }, [mensajes, escribiendo]);
 
   function elegirOpcion(opcion) {
     const nodoSiguiente = NODOS[opcion.next];
     if (!nodoSiguiente) return;
 
-    const nuevos = [
-      { tipo: 'usuario', texto: opcion.label },
-    ];
+    // Agregar mensaje del usuario inmediatamente
+    setMensajes((prev) => [...prev, { tipo: 'usuario', texto: opcion.label, fadeIn: true }]);
+    setMostrarOpciones(false);
 
-    if (nodoSiguiente.bot) {
-      nuevos.push({ tipo: 'bot', texto: nodoSiguiente.bot, ficha: nodoSiguiente.ficha });
-    } else if (nodoSiguiente.ficha) {
-      nuevos.push({ tipo: 'bot', texto: null, ficha: nodoSiguiente.ficha });
-    }
-
-    setMensajes((prev) => [...prev, ...nuevos]);
+    // Actualizar nodo actual
     setNodoActual(opcion.next);
 
-    if (nodoSiguiente.final) {
-      setFinalizado(true);
-    }
+    // Agregar mensaje del bot con efecto de escritura
+    setTimeout(() => {
+      if (nodoSiguiente.bot) {
+        agregarMensajeBot(nodoSiguiente.bot, nodoSiguiente.ficha);
+      } else if (nodoSiguiente.ficha) {
+        agregarMensajeBot(null, nodoSiguiente.ficha);
+      }
+
+      if (nodoSiguiente.final) {
+        setTimeout(() => {
+          setFinalizado(true);
+        }, calcularDelay(nodoSiguiente.bot) + 500);
+      }
+    }, 100);
   }
 
   function reiniciar() {
     const nodo = NODOS.inicio;
-    setMensajes([
-      { tipo: 'bot', texto: 'Hola, soy el asistente de Vigilancia Tropical. Puedo ayudarte a identificar posibles enfermedades tropicales según tus síntomas.' },
-      { tipo: 'bot', texto: nodo.bot },
-    ]);
+    setMensajes([]);
     setNodoActual('inicio');
     setFinalizado(false);
+    setMostrarOpciones(false);
+    
+    // Reiniciar con animación
+    setEscribiendo(true);
+    setTimeout(() => {
+      setMensajes([
+        { 
+          tipo: 'bot', 
+          texto: 'Hola, soy el asistente de Vigilancia Tropical. Puedo ayudarte a identificar posibles enfermedades tropicales según tus síntomas.',
+          fadeIn: true,
+        }
+      ]);
+      setEscribiendo(false);
+      
+      setTimeout(() => {
+        agregarMensajeBot(nodo.bot, nodo.ficha);
+      }, 500);
+    }, 1400);
   }
 
   const nodo = NODOS[nodoActual];
@@ -248,15 +333,21 @@ export default function Chatbot() {
         <div className="flex-1 overflow-y-auto bg-gray-800 rounded-xl border border-gray-700 p-4 space-y-4 mb-4">
           {mensajes.map((m, i) =>
             m.tipo === 'bot' ? (
-              <BurbujaBot key={i} texto={m.texto} ficha={m.ficha} />
+              <BurbujaBot key={i} texto={m.texto} ficha={m.ficha} fadeIn={m.fadeIn} />
             ) : (
-              <BurbujaUsuario key={i} texto={m.texto} />
+              <BurbujaUsuario key={i} texto={m.texto} fadeIn={m.fadeIn} />
             )
           )}
 
+          {/* Indicador de escritura */}
+          {escribiendo && <BurbujaEscribiendo />}
+
           {/* Recomendaciones finales */}
           {finalizado && (
-            <div className="bg-gray-700/50 rounded-xl p-4 mt-2">
+            <div 
+              className="bg-gray-700/50 rounded-xl p-4 mt-2"
+              style={{ animation: 'fadeIn 0.3s ease-in' }}
+            >
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Recomendaciones</p>
               <ul className="space-y-1.5 mb-4">
                 {RECOMENDACIONES.map((r) => (
@@ -288,8 +379,11 @@ export default function Chatbot() {
         </div>
 
         {/* Opciones */}
-        {!finalizado && opciones.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
+        {!finalizado && opciones.length > 0 && mostrarOpciones && (
+          <div 
+            className="flex flex-wrap gap-2 mb-3"
+            style={{ animation: 'fadeIn 0.3s ease-in' }}
+          >
             {opciones.map((op) => (
               <button
                 key={op.next}

@@ -105,7 +105,7 @@ export default function Prediccion() {
       {!loading && !error && (
         <div className="px-4 pb-8 max-w-7xl mx-auto space-y-6">
           {/* Dashboard row */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Gauge panel */}
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 flex flex-col items-center">
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
@@ -122,7 +122,7 @@ export default function Prediccion() {
               <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
                 Por enfermedad
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {predicciones.map((p) => (
                   <RiskCard key={p.id} item={p} />
                 ))}

@@ -177,7 +177,7 @@ export default function Mapa() {
       </div>
 
       {/* Map + Sidebar */}
-      <div className="px-4 pb-8 max-w-7xl mx-auto flex gap-4">
+      <div className="px-4 pb-8 max-w-7xl mx-auto flex flex-col lg:flex-row gap-4">
         {/* Map */}
         <div className="flex-1 rounded-xl overflow-hidden border border-gray-700" style={{ height: '560px' }}>
           <MapContainer
@@ -210,7 +210,7 @@ export default function Mapa() {
         </div>
 
         {/* Sidebar */}
-        <aside className="w-52 shrink-0 bg-gray-800 rounded-xl border border-gray-700 p-4 flex flex-col gap-4">
+        <aside className="w-full lg:w-52 shrink-0 bg-gray-800 rounded-xl border border-gray-700 p-4 flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Leyenda</h3>
           <ul className="space-y-2">
             {[

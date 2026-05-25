@@ -82,7 +82,7 @@ export default function AdminPanel() {
         ) : (
           <>
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {statCards.map((s) => (
                 <div
                   key={s.label}
@@ -96,7 +96,7 @@ export default function AdminPanel() {
               ))}
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Últimos reportes pendientes */}
               <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
                 <div className="flex items-center justify-between mb-4">
