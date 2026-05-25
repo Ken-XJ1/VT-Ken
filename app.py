@@ -4,9 +4,12 @@ Conexión PostgreSQL: usuario kenneth_dev, base vigilancia_tropical
 """
 
 import os
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
 from decimal import Decimal
+from functools import wraps
 
+import bcrypt
+import jwt
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, jsonify, request, send_from_directory
@@ -14,6 +17,9 @@ from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 CORS(app)
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-cambiar-en-produccion")
+JWT_EXPIRY_HOURS = 24
 
 DB_CONFIG = {
     "dbname": os.environ.get("PGDATABASE", "vigilancia_tropical"),
@@ -42,12 +48,61 @@ def serialize_row(row):
     for key, value in row.items():
         if isinstance(value, Decimal):
             out[key] = float(value)
-        elif isinstance(value, date):
+        elif isinstance(value, (date, datetime)):
             out[key] = value.isoformat()
         else:
             out[key] = value
     return out
 
+
+# ---------------------------------------------------------------------------
+# JWT helpers
+# ---------------------------------------------------------------------------
+
+def create_token(user_id, nombre, email, rol):
+    payload = {
+        "sub": user_id,
+        "nombre": nombre,
+        "email": email,
+        "rol": rol,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRY_HOURS),
+        "iat": datetime.now(timezone.utc),
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+def decode_token(token):
+    return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
+
+def require_auth(roles=None):
+    """Decorador que verifica JWT y opcionalmente restringe por rol."""
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            auth_header = request.headers.get("Authorization", "")
+            if not auth_header.startswith("Bearer "):
+                return jsonify({"error": "Token requerido"}), 401
+            token = auth_header.split(" ", 1)[1]
+            try:
+                payload = decode_token(token)
+            except jwt.ExpiredSignatureError:
+                return jsonify({"error": "Token expirado"}), 401
+            except jwt.InvalidTokenError:
+                return jsonify({"error": "Token inválido"}), 401
+
+            if roles and payload.get("rol") not in roles:
+                return jsonify({"error": "Acceso no autorizado"}), 403
+
+            request.current_user = payload
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+# ---------------------------------------------------------------------------
+# Rutas HTML legacy (conservadas para compatibilidad)
+# ---------------------------------------------------------------------------
 
 @app.route("/")
 def index():
@@ -68,6 +123,10 @@ def prediccion_page():
 def enfermedades_page():
     return send_from_directory(".", "enfermedades.html")
 
+
+# ---------------------------------------------------------------------------
+# Endpoints públicos existentes
+# ---------------------------------------------------------------------------
 
 @app.get("/api/municipios")
 def list_municipios():
@@ -207,6 +266,424 @@ def health():
         return jsonify({"status": "ok", "database": "connected"})
     except psycopg2.Error as e:
         return jsonify({"status": "error", "database": str(e)}), 503
+
+
+# ---------------------------------------------------------------------------
+# Autenticación
+# ---------------------------------------------------------------------------
+
+@app.post("/api/auth/registro")
+def auth_registro():
+    data = request.get_json(silent=True) or {}
+    nombre = (data.get("nombre") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not nombre or not email or not password:
+        return jsonify({"error": "nombre, email y password son requeridos"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
+
+    password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO usuarios (nombre, email, password_hash, rol)
+                    VALUES (%s, %s, %s, 'ciudadano')
+                    RETURNING id, nombre, email, rol
+                    """,
+                    (nombre, email, password_hash),
+                )
+                user = serialize_row(cur.fetchone())
+            conn.commit()
+        token = create_token(user["id"], user["nombre"], user["email"], user["rol"])
+        return jsonify({"token": token, "user": user}), 201
+    except psycopg2.errors.UniqueViolation:
+        return jsonify({"error": "El email ya está registrado"}), 409
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.post("/api/auth/login")
+def auth_login():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not email or not password:
+        return jsonify({"error": "email y password son requeridos"}), 400
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, nombre, email, rol, password_hash, activo FROM usuarios WHERE email = %s",
+                    (email,),
+                )
+                user = cur.fetchone()
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+    if not user:
+        return jsonify({"error": "Credenciales incorrectas"}), 401
+    if not user["activo"]:
+        return jsonify({"error": "Cuenta desactivada. Contacta al administrador"}), 403
+    if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
+        return jsonify({"error": "Credenciales incorrectas"}), 401
+
+    token = create_token(user["id"], user["nombre"], user["email"], user["rol"])
+    return jsonify({
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "nombre": user["nombre"],
+            "email": user["email"],
+            "rol": user["rol"],
+        },
+    })
+
+
+@app.get("/api/auth/me")
+@require_auth()
+def auth_me():
+    u = request.current_user
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, nombre, email, rol, activo, fecha_registro FROM usuarios WHERE id = %s",
+                    (u["sub"],),
+                )
+                user = serialize_row(cur.fetchone())
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify(user)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Reportes de síntomas
+# ---------------------------------------------------------------------------
+
+@app.post("/api/reportes")
+@require_auth(roles=["ciudadano", "admin"])
+def crear_reporte():
+    data = request.get_json(silent=True) or {}
+    sintomas = (data.get("sintomas") or "").strip()
+    if not sintomas:
+        return jsonify({"error": "El campo sintomas es requerido"}), 400
+
+    municipio_id = data.get("municipio_id")
+    enfermedad_sospechosa = (data.get("enfermedad_sospechosa") or "").strip() or None
+    nivel_urgencia = data.get("nivel_urgencia", "normal")
+    nombre_reporte = (data.get("nombre_reporte") or "").strip() or None
+
+    if nivel_urgencia not in ("normal", "urgente", "critico"):
+        nivel_urgencia = "normal"
+
+    usuario_id = request.current_user["sub"]
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO reportes_sintomas
+                        (usuario_id, nombre_reporte, municipio_id, sintomas,
+                         enfermedad_sospechosa, nivel_urgencia)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id, fecha_reporte, estado
+                    """,
+                    (usuario_id, nombre_reporte, municipio_id, sintomas,
+                     enfermedad_sospechosa, nivel_urgencia),
+                )
+                row = serialize_row(cur.fetchone())
+            conn.commit()
+        return jsonify({"mensaje": "Reporte enviado correctamente", "reporte": row}), 201
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.get("/api/reportes")
+@require_auth(roles=["ciudadano", "admin"])
+def list_reportes():
+    u = request.current_user
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                if u["rol"] == "admin":
+                    cur.execute(
+                        """
+                        SELECT r.id, r.nombre_reporte, r.sintomas, r.enfermedad_sospechosa,
+                               r.nivel_urgencia, r.estado, r.respuesta_admin,
+                               r.fecha_reporte, r.fecha_respuesta,
+                               r.municipio_id, m.nombre AS municipio,
+                               r.usuario_id, us.nombre AS usuario, us.email AS usuario_email
+                        FROM reportes_sintomas r
+                        LEFT JOIN municipios m ON m.id = r.municipio_id
+                        LEFT JOIN usuarios us ON us.id = r.usuario_id
+                        ORDER BY r.fecha_reporte DESC
+                        """
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT r.id, r.nombre_reporte, r.sintomas, r.enfermedad_sospechosa,
+                               r.nivel_urgencia, r.estado, r.respuesta_admin,
+                               r.fecha_reporte, r.fecha_respuesta,
+                               r.municipio_id, m.nombre AS municipio
+                        FROM reportes_sintomas r
+                        LEFT JOIN municipios m ON m.id = r.municipio_id
+                        WHERE r.usuario_id = %s
+                        ORDER BY r.fecha_reporte DESC
+                        """,
+                        (u["sub"],),
+                    )
+                rows = [serialize_row(r) for r in cur.fetchall()]
+        return jsonify(rows)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/reportes/<int:reporte_id>/responder")
+@require_auth(roles=["admin"])
+def responder_reporte(reporte_id):
+    data = request.get_json(silent=True) or {}
+    respuesta = (data.get("respuesta_admin") or "").strip()
+    estado = data.get("estado", "revisado")
+
+    if estado not in ("pendiente", "revisado", "cerrado"):
+        estado = "revisado"
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE reportes_sintomas
+                    SET respuesta_admin = %s, estado = %s, fecha_respuesta = NOW()
+                    WHERE id = %s
+                    RETURNING id, estado, fecha_respuesta
+                    """,
+                    (respuesta, estado, reporte_id),
+                )
+                row = cur.fetchone()
+                if not row:
+                    return jsonify({"error": "Reporte no encontrado"}), 404
+                result = serialize_row(row)
+            conn.commit()
+        return jsonify({"mensaje": "Respuesta guardada", "reporte": result})
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Mensajes
+# ---------------------------------------------------------------------------
+
+@app.post("/api/mensajes")
+@require_auth(roles=["ciudadano", "admin"])
+def enviar_mensaje():
+    data = request.get_json(silent=True) or {}
+    asunto = (data.get("asunto") or "").strip()
+    mensaje = (data.get("mensaje") or "").strip()
+
+    if not asunto or not mensaje:
+        return jsonify({"error": "asunto y mensaje son requeridos"}), 400
+
+    usuario_id = request.current_user["sub"]
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO mensajes (usuario_id, asunto, mensaje)
+                    VALUES (%s, %s, %s)
+                    RETURNING id, fecha_mensaje
+                    """,
+                    (usuario_id, asunto, mensaje),
+                )
+                row = serialize_row(cur.fetchone())
+            conn.commit()
+        return jsonify({"mensaje": "Mensaje enviado correctamente", "data": row}), 201
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.get("/api/mensajes")
+@require_auth(roles=["ciudadano", "admin"])
+def list_mensajes():
+    u = request.current_user
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                if u["rol"] == "admin":
+                    cur.execute(
+                        """
+                        SELECT m.id, m.asunto, m.mensaje, m.leido,
+                               m.respuesta_admin, m.fecha_mensaje, m.fecha_respuesta,
+                               m.usuario_id, u.nombre AS usuario, u.email AS usuario_email
+                        FROM mensajes m
+                        JOIN usuarios u ON u.id = m.usuario_id
+                        ORDER BY m.fecha_mensaje DESC
+                        """
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT id, asunto, mensaje, leido,
+                               respuesta_admin, fecha_mensaje, fecha_respuesta
+                        FROM mensajes
+                        WHERE usuario_id = %s
+                        ORDER BY fecha_mensaje DESC
+                        """,
+                        (u["sub"],),
+                    )
+                rows = [serialize_row(r) for r in cur.fetchall()]
+        return jsonify(rows)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/mensajes/<int:mensaje_id>/responder")
+@require_auth(roles=["admin"])
+def responder_mensaje(mensaje_id):
+    data = request.get_json(silent=True) or {}
+    respuesta = (data.get("respuesta_admin") or "").strip()
+    if not respuesta:
+        return jsonify({"error": "respuesta_admin es requerido"}), 400
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE mensajes
+                    SET respuesta_admin = %s, leido = true, fecha_respuesta = NOW()
+                    WHERE id = %s
+                    RETURNING id, fecha_respuesta
+                    """,
+                    (respuesta, mensaje_id),
+                )
+                row = cur.fetchone()
+                if not row:
+                    return jsonify({"error": "Mensaje no encontrado"}), 404
+                result = serialize_row(row)
+            conn.commit()
+        return jsonify({"mensaje": "Respuesta enviada", "data": result})
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/mensajes/<int:mensaje_id>/leer")
+@require_auth(roles=["admin"])
+def marcar_leido(mensaje_id):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE mensajes SET leido = true WHERE id = %s RETURNING id",
+                    (mensaje_id,),
+                )
+                if not cur.fetchone():
+                    return jsonify({"error": "Mensaje no encontrado"}), 404
+            conn.commit()
+        return jsonify({"mensaje": "Marcado como leido"})
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+# ---------------------------------------------------------------------------
+# Panel admin — estadísticas
+# ---------------------------------------------------------------------------
+
+@app.get("/api/admin/stats")
+@require_auth(roles=["admin"])
+def admin_stats():
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'ciudadano'")
+                total_usuarios = cur.fetchone()["total"]
+
+                cur.execute("SELECT COUNT(*) AS total FROM reportes_sintomas")
+                total_reportes = cur.fetchone()["total"]
+
+                cur.execute("SELECT COUNT(*) AS total FROM reportes_sintomas WHERE estado = 'pendiente'")
+                reportes_pendientes = cur.fetchone()["total"]
+
+                cur.execute("SELECT COUNT(*) AS total FROM mensajes")
+                total_mensajes = cur.fetchone()["total"]
+
+                cur.execute("SELECT COUNT(*) AS total FROM mensajes WHERE leido = false")
+                mensajes_no_leidos = cur.fetchone()["total"]
+
+                cur.execute(
+                    """
+                    SELECT COUNT(*) AS total FROM brotes
+                    WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
+                    """
+                )
+                brotes_este_mes = cur.fetchone()["total"]
+
+        return jsonify({
+            "total_usuarios": total_usuarios,
+            "total_reportes": total_reportes,
+            "reportes_pendientes": reportes_pendientes,
+            "total_mensajes": total_mensajes,
+            "mensajes_no_leidos": mensajes_no_leidos,
+            "brotes_este_mes": brotes_este_mes,
+        })
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.get("/api/admin/usuarios")
+@require_auth(roles=["admin"])
+def admin_list_usuarios():
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id, nombre, email, rol, activo, fecha_registro
+                    FROM usuarios ORDER BY fecha_registro DESC
+                    """
+                )
+                rows = [serialize_row(r) for r in cur.fetchall()]
+        return jsonify(rows)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/admin/usuarios/<int:usuario_id>/toggle")
+@require_auth(roles=["admin"])
+def toggle_usuario(usuario_id):
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # No permitir desactivar al admin principal
+                cur.execute("SELECT email, activo FROM usuarios WHERE id = %s", (usuario_id,))
+                user = cur.fetchone()
+                if not user:
+                    return jsonify({"error": "Usuario no encontrado"}), 404
+                if user["email"] == "admin@vigilanciatropical.co":
+                    return jsonify({"error": "No se puede desactivar al administrador principal"}), 403
+
+                cur.execute(
+                    "UPDATE usuarios SET activo = NOT activo WHERE id = %s RETURNING id, activo",
+                    (usuario_id,),
+                )
+                result = serialize_row(cur.fetchone())
+            conn.commit()
+        return jsonify(result)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
 
 
 if __name__ == "__main__":

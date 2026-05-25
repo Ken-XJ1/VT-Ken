@@ -66,6 +66,55 @@ CREATE INDEX idx_brotes_fecha ON brotes(fecha DESC);
 CREATE INDEX idx_clima_municipio_fecha ON datos_climaticos(municipio_id, fecha DESC);
 CREATE INDEX idx_predicciones_municipio ON predicciones(municipio_id, fecha_prediccion DESC);
 
+-- Usuarios del sistema
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol VARCHAR(20) NOT NULL DEFAULT 'ciudadano' CHECK (rol IN ('ciudadano', 'admin')),
+    activo BOOLEAN NOT NULL DEFAULT true,
+    fecha_registro TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Reportes de síntomas enviados por ciudadanos
+CREATE TABLE IF NOT EXISTS reportes_sintomas (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    nombre_reporte VARCHAR(100),
+    municipio_id INTEGER REFERENCES municipios(id),
+    sintomas TEXT NOT NULL,
+    enfermedad_sospechosa VARCHAR(80),
+    nivel_urgencia VARCHAR(20) DEFAULT 'normal' CHECK (nivel_urgencia IN ('normal', 'urgente', 'critico')),
+    estado VARCHAR(20) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'revisado', 'cerrado')),
+    respuesta_admin TEXT,
+    fecha_reporte TIMESTAMP NOT NULL DEFAULT NOW(),
+    fecha_respuesta TIMESTAMP
+);
+
+-- Mensajes de ciudadanos al administrador
+CREATE TABLE IF NOT EXISTS mensajes (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    asunto VARCHAR(200) NOT NULL,
+    mensaje TEXT NOT NULL,
+    leido BOOLEAN DEFAULT false,
+    respuesta_admin TEXT,
+    fecha_mensaje TIMESTAMP NOT NULL DEFAULT NOW(),
+    fecha_respuesta TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reportes_usuario ON reportes_sintomas(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes_sintomas(estado);
+CREATE INDEX IF NOT EXISTS idx_mensajes_usuario ON mensajes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_mensajes_leido ON mensajes(leido);
+
+-- Usuario admin por defecto (password: Admin2026*)
+INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES
+('Administrador', 'admin@vigilanciatropical.co',
+ '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMxM8WPbMQCgMp7RK5B.Kn7qKi', 'admin')
+ON CONFLICT (email) DO NOTHING;
+
 -- Municipios: Quibdó e Istmina
 INSERT INTO municipios (nombre, habitantes, lat, lng) VALUES
     ('Quibdó', 129237, 5.694700, -76.661100),

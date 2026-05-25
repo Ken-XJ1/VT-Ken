@@ -3,22 +3,24 @@ import StatCard from '../components/StatCard';
 
 const FEATURES = [
   {
-    icon: '🗺️',
     title: 'Mapa interactivo',
     desc: 'Brotes georreferenciados con filtros por municipio y enfermedad en el Chocó.',
     to: '/mapa',
   },
   {
-    icon: '📊',
     title: 'Predicción de riesgo',
     desc: 'Probabilidad por enfermedad y panel climático integrado al modelo.',
     to: '/prediccion',
   },
   {
-    icon: '🦟',
     title: 'Fichas clínicas',
     desc: 'Síntomas, transmisión y prevención de dengue, malaria, zika y chikungunya.',
     to: '/enfermedades',
+  },
+  {
+    title: 'Asistente de síntomas',
+    desc: 'Orientación basada en árbol de decisiones para identificar posibles enfermedades.',
+    to: '/chatbot',
   },
 ];
 
@@ -96,14 +98,13 @@ export default function Inicio() {
               Explora brotes, predicciones y fichas para la toma de decisiones en salud pública.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             {FEATURES.map((f) => (
               <Link
                 key={f.to}
                 to={f.to}
                 className="bg-gray-800 hover:bg-gray-750 border border-gray-700 hover:border-red-600 rounded-xl p-6 transition-all group"
               >
-                <span className="text-4xl mb-4 block">{f.icon}</span>
                 <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-red-400 transition-colors">
                   {f.title}
                 </h3>

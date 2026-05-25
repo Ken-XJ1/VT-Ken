@@ -1,4 +1,5 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function VirusIcon() {
   return (
@@ -30,44 +31,98 @@ function VirusIcon() {
   );
 }
 
-const navLinkClass = ({ isActive }) =>
+const linkClass = ({ isActive }) =>
   `text-sm font-medium transition-colors ${
     isActive ? 'text-red-400' : 'text-gray-300 hover:text-white'
   }`;
 
 export default function Navbar() {
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/');
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900 border-b border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-white font-bold text-lg">
+        <Link to="/" className="flex items-center gap-2 text-white font-bold text-lg shrink-0">
           <VirusIcon />
-          <span>
+          <span className="hidden sm:inline">
             Vigilancia <span className="text-red-400 italic">Tropical</span>
           </span>
         </Link>
 
-        {/* Nav links */}
-        <nav aria-label="Navegación principal">
-          <ul className="hidden md:flex items-center gap-6">
-            <li><NavLink to="/" end className={navLinkClass}>Inicio</NavLink></li>
-            <li><NavLink to="/mapa" className={navLinkClass}>Mapa</NavLink></li>
-            <li><NavLink to="/prediccion" className={navLinkClass}>Predicción</NavLink></li>
-            <li><NavLink to="/enfermedades" className={navLinkClass}>Enfermedades</NavLink></li>
+        {/* Nav links — varían según estado de auth */}
+        <nav aria-label="Navegación principal" className="flex-1">
+          <ul className="hidden md:flex items-center gap-5">
+            <li><NavLink to="/" end className={linkClass}>Inicio</NavLink></li>
+            <li><NavLink to="/mapa" className={linkClass}>Mapa</NavLink></li>
+            <li><NavLink to="/prediccion" className={linkClass}>Predicción</NavLink></li>
+            <li><NavLink to="/enfermedades" className={linkClass}>Enfermedades</NavLink></li>
+            <li><NavLink to="/chatbot" className={linkClass}>Asistente</NavLink></li>
+
+            {isAuthenticated && !isAdmin && (
+              <>
+                <li><NavLink to="/dashboard" className={linkClass}>Mi panel</NavLink></li>
+                <li><NavLink to="/reportar" className={linkClass}>Reportar</NavLink></li>
+                <li><NavLink to="/mensajes" className={linkClass}>Mensajes</NavLink></li>
+              </>
+            )}
+
+            {isAdmin && (
+              <>
+                <li>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) =>
+                      `text-sm font-bold transition-colors ${isActive ? 'text-red-300' : 'text-red-400 hover:text-red-300'}`
+                    }
+                  >
+                    Panel Admin
+                  </NavLink>
+                </li>
+                <li><NavLink to="/admin/reportes" className={linkClass}>Reportes</NavLink></li>
+                <li><NavLink to="/admin/mensajes" className={linkClass}>Mensajes</NavLink></li>
+                <li><NavLink to="/admin/usuarios" className={linkClass}>Usuarios</NavLink></li>
+              </>
+            )}
           </ul>
         </nav>
 
-        {/* Badge + CTA */}
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
-            Chocó, Colombia
-          </span>
-          <Link
-            to="/mapa"
-            className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-          >
-            Ver mapa
-          </Link>
+        {/* Acciones de sesión */}
+        <div className="flex items-center gap-2 shrink-0">
+          {!isAuthenticated ? (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium text-gray-300 hover:text-white transition-colors px-3 py-2"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                to="/registro"
+                className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              >
+                Registrarse
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="hidden sm:block text-sm text-gray-400 max-w-32 truncate">
+                {user?.nombre}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="text-sm font-medium text-gray-400 hover:text-white border border-gray-600 hover:border-gray-400 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

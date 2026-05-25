@@ -16,6 +16,8 @@ services:
         sync: false
       - key: PGPORT
         sync: false
+      - key: SECRET_KEY
+        sync: false
 
   # Frontend React (static site)
   - type: web
