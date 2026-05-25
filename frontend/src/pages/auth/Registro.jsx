@@ -47,7 +47,7 @@ export default function Registro() {
   }
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="bg-gray-800 rounded-2xl border border-gray-700 p-8">
           <h1 className="text-2xl font-bold text-white mb-1">Crear cuenta</h1>

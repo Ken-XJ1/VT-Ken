@@ -112,7 +112,7 @@ export default function Mapa() {
   );
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900">
       {/* Header */}
       <div className="px-4 py-8 max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">Mapa de brotes</h1>

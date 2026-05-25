@@ -87,7 +87,7 @@ export default function FormularioReporte() {
 
   if (exito) {
     return (
-      <main className="pt-16 min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <main className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-gray-800 rounded-2xl border border-green-700 p-8 text-center">
           <div className="w-12 h-12 bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +118,7 @@ export default function FormularioReporte() {
   }
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-white mb-2">Reportar síntomas</h1>
         <p className="text-gray-400 mb-8">

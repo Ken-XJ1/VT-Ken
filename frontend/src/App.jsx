@@ -1,8 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import UserLayout from './layouts/UserLayout';
-import AdminLayout from './layouts/AdminLayout';
+import MainLayout from './layouts/MainLayout';
 
 // Páginas públicas
 import Inicio from './pages/Inicio';
@@ -30,37 +28,32 @@ import AdminUsuarios from './pages/admin/AdminUsuarios';
 export default function App() {
   return (
     <Routes>
-      {/* Rutas públicas con Navbar */}
-      <Route path="/" element={<><Navbar /><Inicio /></>} />
-      <Route path="/mapa" element={<><Navbar /><Mapa /></>} />
-      <Route path="/prediccion" element={<><Navbar /><Prediccion /></>} />
-      <Route path="/enfermedades" element={<><Navbar /><Enfermedades /></>} />
-      <Route path="/chatbot" element={<><Navbar /><Chatbot /></>} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/registro" element={<Registro />} />
+      {/* Todas las rutas usan MainLayout con sidebar global */}
+      <Route element={<MainLayout />}>
+        {/* Rutas públicas */}
+        <Route path="/" element={<Inicio />} />
+        <Route path="/mapa" element={<Mapa />} />
+        <Route path="/prediccion" element={<Prediccion />} />
+        <Route path="/enfermedades" element={<Enfermedades />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
 
-      {/* Rutas de ciudadano con UserLayout */}
-      <Route element={
-        <ProtectedRoute roles={['ciudadano', 'admin']}>
-          <UserLayout />
-        </ProtectedRoute>
-      }>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/reportar" element={<FormularioReporte />} />
-        <Route path="/mis-reportes" element={<MisReportes />} />
-        <Route path="/mensajes" element={<Mensajes />} />
-      </Route>
+        {/* Rutas de ciudadano protegidas */}
+        <Route element={<ProtectedRoute roles={['ciudadano', 'admin']} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reportar" element={<FormularioReporte />} />
+          <Route path="/mis-reportes" element={<MisReportes />} />
+          <Route path="/mensajes" element={<Mensajes />} />
+        </Route>
 
-      {/* Rutas de admin con AdminLayout */}
-      <Route element={
-        <ProtectedRoute roles={['admin']}>
-          <AdminLayout />
-        </ProtectedRoute>
-      }>
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/admin/reportes" element={<AdminReportes />} />
-        <Route path="/admin/mensajes" element={<AdminMensajes />} />
-        <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+        {/* Rutas de admin protegidas */}
+        <Route element={<ProtectedRoute roles={['admin']} />}>
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/reportes" element={<AdminReportes />} />
+          <Route path="/admin/mensajes" element={<AdminMensajes />} />
+          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+        </Route>
       </Route>
     </Routes>
   );

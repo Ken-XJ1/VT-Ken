@@ -1,11 +1,11 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
  * Ruta protegida por autenticación y rol opcional.
  * @param {string[]} [roles] - Roles permitidos. Si se omite, cualquier usuario autenticado puede acceder.
  */
-export default function ProtectedRoute({ children, roles }) {
+export default function ProtectedRoute({ roles }) {
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
@@ -16,5 +16,5 @@ export default function ProtectedRoute({ children, roles }) {
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return <Outlet />;
 }

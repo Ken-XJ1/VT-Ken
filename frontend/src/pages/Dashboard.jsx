@@ -42,7 +42,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Saludo */}
         <div className="mb-8">

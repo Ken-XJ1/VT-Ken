@@ -54,7 +54,7 @@ const PASOS = [
 
 export default function Inicio() {
   return (
-    <main className="pt-16 bg-[#0a0f1e]">
+    <main className="bg-[#0a0f1e]">
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-emerald-900/20 via-transparent to-blue-900/20 py-20 sm:py-28 px-4 overflow-hidden">
         <div className="absolute inset-0 dot-pattern opacity-30" />

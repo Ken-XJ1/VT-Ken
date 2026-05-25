@@ -54,7 +54,7 @@ export default function AdminMensajes() {
   }
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-6">
         {/* Lista */}
         <div className="flex-1 min-w-0">

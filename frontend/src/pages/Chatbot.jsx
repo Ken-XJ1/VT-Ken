@@ -321,8 +321,8 @@ export default function Chatbot() {
   const opciones = nodo?.opciones || [];
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
-      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
+    <main className="min-h-screen bg-gray-900">
+      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col h-screen">
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-white">Asistente de síntomas</h1>

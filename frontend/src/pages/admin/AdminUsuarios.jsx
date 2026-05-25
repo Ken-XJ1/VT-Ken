@@ -31,7 +31,7 @@ export default function AdminUsuarios() {
   }
 
   return (
-    <main className="pt-16 min-h-screen bg-gray-900">
+    <main className="min-h-screen bg-gray-900">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-white mb-2">Usuarios registrados</h1>
         <p className="text-gray-400 text-sm mb-6">Gestiona las cuentas de ciudadanos del sistema.</p>
