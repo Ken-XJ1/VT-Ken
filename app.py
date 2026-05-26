@@ -186,6 +186,18 @@ def prediccion():
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
+                # Obtener nombre del municipio
+                cur.execute("SELECT nombre FROM municipios WHERE id = %s", (municipio_id,))
+                mun_row = cur.fetchone()
+                if not mun_row:
+                    return jsonify({"error": "Municipio no encontrado"}), 404
+                municipio_nombre = mun_row["nombre"]
+
+                # Obtener todas las enfermedades
+                cur.execute("SELECT id, nombre FROM enfermedades ORDER BY nombre")
+                enfermedades = {r["id"]: r["nombre"] for r in cur.fetchall()}
+
+                # Buscar predicciones guardadas (última fecha disponible)
                 cur.execute(
                     """
                     SELECT p.id, p.municipio_id, p.enfermedad_id,
@@ -204,7 +216,67 @@ def prediccion():
                     """,
                     (municipio_id, municipio_id),
                 )
-                rows = [serialize_row(r) for r in cur.fetchall()]
+                saved = [serialize_row(r) for r in cur.fetchall()]
+
+                # Determinar qué enfermedades ya tienen predicción guardada
+                saved_enfermedad_ids = {r["enfermedad_id"] for r in saved}
+                missing_ids = set(enfermedades.keys()) - saved_enfermedad_ids
+
+                # Para las enfermedades sin predicción, calcular desde brotes recientes (90 días)
+                computed = []
+                if missing_ids:
+                    cur.execute(
+                        """
+                        SELECT b.enfermedad_id,
+                               COUNT(*)                          AS num_brotes,
+                               COALESCE(SUM(b.numero_casos), 0) AS total_casos,
+                               MAX(b.fecha)                     AS ultimo_brote
+                        FROM brotes b
+                        WHERE b.municipio_id = %s
+                          AND b.enfermedad_id = ANY(%s)
+                          AND b.fecha >= CURRENT_DATE - INTERVAL '90 days'
+                        GROUP BY b.enfermedad_id
+                        """,
+                        (municipio_id, list(missing_ids)),
+                    )
+                    brote_stats = {r["enfermedad_id"]: r for r in cur.fetchall()}
+
+                    today_str = date.today().isoformat()
+                    for eid in missing_ids:
+                        stats = brote_stats.get(eid)
+                        if stats:
+                            casos = int(stats["total_casos"])
+                            # Probabilidad proporcional a casos (cap 95)
+                            prob = min(round(casos * 1.5, 1), 95.0)
+                        else:
+                            prob = 5.0
+
+                        if prob >= 70:
+                            nivel = "alto"
+                        elif prob >= 40:
+                            nivel = "medio"
+                        elif prob >= 15:
+                            nivel = "bajo"
+                        else:
+                            nivel = "bajo"
+
+                        computed.append({
+                            "id": None,
+                            "municipio_id": municipio_id,
+                            "enfermedad_id": eid,
+                            "fecha_prediccion": today_str,
+                            "probabilidad": prob,
+                            "nivel_riesgo": nivel,
+                            "enfermedad": enfermedades[eid],
+                            "municipio": municipio_nombre,
+                        })
+
+                rows = sorted(
+                    saved + computed,
+                    key=lambda r: r["probabilidad"],
+                    reverse=True,
+                )
+
         if not rows:
             return jsonify({"error": "Sin predicciones para este municipio"}), 404
         return jsonify({"municipio_id": municipio_id, "predicciones": rows})
