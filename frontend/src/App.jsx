@@ -13,6 +13,9 @@ import Chatbot from './pages/Chatbot';
 import Login from './pages/auth/Login';
 import Registro from './pages/auth/Registro';
 
+// Perfil
+import Perfil from './pages/Perfil';
+
 // Ciudadano
 import Dashboard from './pages/Dashboard';
 import FormularioReporte from './pages/FormularioReporte';
@@ -24,6 +27,7 @@ import AdminPanel from './pages/admin/AdminPanel';
 import AdminReportes from './pages/admin/AdminReportes';
 import AdminMensajes from './pages/admin/AdminMensajes';
 import AdminUsuarios from './pages/admin/AdminUsuarios';
+import AdminAuditoria from './pages/admin/AdminAuditoria';
 
 export default function App() {
   return (
@@ -41,6 +45,7 @@ export default function App() {
 
         {/* Rutas de ciudadano protegidas */}
         <Route element={<ProtectedRoute roles={['ciudadano', 'admin']} />}>
+          <Route path="/perfil" element={<Perfil />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reportar" element={<FormularioReporte />} />
           <Route path="/mis-reportes" element={<MisReportes />} />
@@ -53,6 +58,7 @@ export default function App() {
           <Route path="/admin/reportes" element={<AdminReportes />} />
           <Route path="/admin/mensajes" element={<AdminMensajes />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+          <Route path="/admin/auditoria" element={<AdminAuditoria />} />
         </Route>
       </Route>
     </Routes>

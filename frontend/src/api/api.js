@@ -177,3 +177,23 @@ export function getAdminUsuarios() {
 export function toggleUsuario(id) {
   return putAuth(`/api/admin/usuarios/${id}/toggle`, {});
 }
+
+export function editarUsuario(id, data) {
+  return putAuth(`/api/admin/usuarios/${id}`, data);
+}
+
+export function getAuditoria(limite = 100) {
+  return getAuth(`/api/admin/auditoria?limite=${limite}`);
+}
+
+// ---------------------------------------------------------------------------
+// Perfil
+// ---------------------------------------------------------------------------
+
+export function getPerfil() {
+  return getAuth('/api/perfil');
+}
+
+export function actualizarPerfil(data) {
+  return putAuth('/api/perfil', data);
+}

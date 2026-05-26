@@ -110,10 +110,24 @@ CREATE TABLE IF NOT EXISTS mensajes (
     fecha_respuesta TIMESTAMP
 );
 
+-- Auditoría de acciones del sistema
+CREATE TABLE IF NOT EXISTS auditoria (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    accion VARCHAR(100) NOT NULL,
+    tabla_afectada VARCHAR(50),
+    registro_id INTEGER,
+    detalles TEXT,
+    ip_address VARCHAR(45),
+    fecha TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_reportes_usuario ON reportes_sintomas(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_reportes_estado ON reportes_sintomas(estado);
 CREATE INDEX IF NOT EXISTS idx_mensajes_usuario ON mensajes(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_mensajes_leido ON mensajes(leido);
+CREATE INDEX IF NOT EXISTS idx_auditoria_usuario ON auditoria(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON auditoria(fecha DESC);
 
 -- Usuario admin por defecto (password: Tropical2026)
 INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES

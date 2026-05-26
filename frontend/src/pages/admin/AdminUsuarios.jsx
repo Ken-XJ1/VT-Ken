@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAdminUsuarios, toggleUsuario } from '../../api/api';
+import { getAdminUsuarios, toggleUsuario, editarUsuario } from '../../api/api';
 import BackButton from '../../components/BackButton';
 
 export default function AdminUsuarios() {
@@ -7,6 +7,10 @@ export default function AdminUsuarios() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [toggling, setToggling] = useState(null);
+  const [editando, setEditando] = useState(null);
+  const [formEdit, setFormEdit] = useState({ nombre: '', email: '', rol: 'ciudadano' });
+  const [guardando, setGuardando] = useState(false);
+  const [mensajeEdit, setMensajeEdit] = useState('');
 
   function cargar() {
     setLoading(true);
@@ -28,6 +32,36 @@ export default function AdminUsuarios() {
       setError(err.message);
     } finally {
       setToggling(null);
+    }
+  }
+
+  function abrirEdicion(u) {
+    setEditando(u.id);
+    setFormEdit({ nombre: u.nombre, email: u.email, rol: u.rol });
+    setMensajeEdit('');
+  }
+
+  function cerrarEdicion() {
+    setEditando(null);
+    setFormEdit({ nombre: '', email: '', rol: 'ciudadano' });
+    setMensajeEdit('');
+  }
+
+  async function guardarEdicion(e) {
+    e.preventDefault();
+    setGuardando(true);
+    setMensajeEdit('');
+    try {
+      const result = await editarUsuario(editando, formEdit);
+      setUsuarios((prev) => prev.map((x) => x.id === editando ? result : x));
+      setMensajeEdit('Usuario actualizado correctamente');
+      setTimeout(() => {
+        cerrarEdicion();
+      }, 1500);
+    } catch (err) {
+      setMensajeEdit(err.message);
+    } finally {
+      setGuardando(false);
     }
   }
 
@@ -78,19 +112,27 @@ export default function AdminUsuarios() {
                           {u.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <td className="px-4 py-3 text-right whitespace-nowrap space-x-2">
                         {!esAdmin && (
-                          <button
-                            onClick={() => handleToggle(u)}
-                            disabled={toggling === u.id}
-                            className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 ${
-                              u.activo
-                                ? 'border-red-700 text-red-400 hover:bg-red-900/20'
-                                : 'border-green-700 text-green-400 hover:bg-green-900/20'
-                            }`}
-                          >
-                            {toggling === u.id ? '...' : u.activo ? 'Desactivar' : 'Activar'}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => abrirEdicion(u)}
+                              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-blue-700 text-blue-400 hover:bg-blue-900/20 transition-colors"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleToggle(u)}
+                              disabled={toggling === u.id}
+                              className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50 ${
+                                u.activo
+                                  ? 'border-red-700 text-red-400 hover:bg-red-900/20'
+                                  : 'border-green-700 text-green-400 hover:bg-green-900/20'
+                              }`}
+                            >
+                              {toggling === u.id ? '...' : u.activo ? 'Desactivar' : 'Activar'}
+                            </button>
+                          </>
                         )}
                       </td>
                     </tr>
@@ -104,6 +146,78 @@ export default function AdminUsuarios() {
           </div>
         )}
       </div>
+
+      {/* Modal de edición */}
+      {editando && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold text-white mb-4">Editar usuario</h2>
+            
+            {mensajeEdit && (
+              <div className={`text-sm rounded-lg px-4 py-3 mb-4 ${
+                mensajeEdit.includes('correctamente') 
+                  ? 'bg-green-900/30 border border-green-700 text-green-300'
+                  : 'bg-red-900/30 border border-red-700 text-red-300'
+              }`}>
+                {mensajeEdit}
+              </div>
+            )}
+
+            <form onSubmit={guardarEdicion} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
+                <input
+                  type="text"
+                  value={formEdit.nombre}
+                  onChange={(e) => setFormEdit((f) => ({ ...f, nombre: e.target.value }))}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formEdit.email}
+                  onChange={(e) => setFormEdit((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Rol</label>
+                <select
+                  value={formEdit.rol}
+                  onChange={(e) => setFormEdit((f) => ({ ...f, rol: e.target.value }))}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
+                >
+                  <option value="ciudadano">Ciudadano</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={cerrarEdicion}
+                  className="flex-1 border border-gray-600 text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={guardando}
+                  className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+                >
+                  {guardando ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -161,6 +161,7 @@ export default function MainLayout() {
     { to: '/admin/reportes', label: 'Reportes', icon: DocumentIcon },
     { to: '/admin/mensajes', label: 'Mensajes', icon: InboxIcon },
     { to: '/admin/usuarios', label: 'Usuarios', icon: UsersIcon },
+    { to: '/admin/auditoria', label: 'Auditoría', icon: DocumentIcon },
   ];
 
   // Función para obtener el color del avatar basado en el nombre
@@ -329,7 +330,11 @@ export default function MainLayout() {
             </div>
           ) : (
             <div>
-              <div className="flex items-center gap-3 px-3 py-2 mb-2">
+              <Link
+                to="/perfil"
+                onClick={closeSidebar}
+                className="flex items-center gap-3 px-3 py-2 mb-2 hover:bg-[#1f2937] rounded-lg transition-colors"
+              >
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${getAvatarColor(
                     user?.nombre
@@ -341,7 +346,7 @@ export default function MainLayout() {
                   <p className="text-sm font-medium text-white truncate">{user?.nombre}</p>
                   <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                 </div>
-              </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="w-full px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#1f2937] rounded-lg transition-colors text-left"

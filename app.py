@@ -793,8 +793,202 @@ def toggle_usuario(usuario_id):
                     (usuario_id,),
                 )
                 result = serialize_row(cur.fetchone())
+                
+                # Registrar en auditoría
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (request.current_user["sub"], "toggle_usuario", "usuarios", usuario_id, 
+                     f"Usuario {'activado' if result['activo'] else 'desactivado'}")
+                )
             conn.commit()
         return jsonify(result)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/admin/usuarios/<int:usuario_id>")
+@require_auth(roles=["admin"])
+def editar_usuario(usuario_id):
+    """Editar datos de un usuario (solo admin)"""
+    data = request.get_json(silent=True) or {}
+    nombre = (data.get("nombre") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    rol = data.get("rol", "ciudadano")
+    
+    if not nombre or not email:
+        return jsonify({"error": "nombre y email son requeridos"}), 400
+    if rol not in ("ciudadano", "admin"):
+        return jsonify({"error": "rol debe ser 'ciudadano' o 'admin'"}), 400
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Verificar que el usuario existe
+                cur.execute("SELECT email FROM usuarios WHERE id = %s", (usuario_id,))
+                user = cur.fetchone()
+                if not user:
+                    return jsonify({"error": "Usuario no encontrado"}), 404
+                
+                # No permitir cambiar el email del admin principal
+                if user["email"] == "admin@vigilanciatropical.co" and email != user["email"]:
+                    return jsonify({"error": "No se puede cambiar el email del administrador principal"}), 403
+                
+                # Actualizar usuario
+                cur.execute(
+                    """
+                    UPDATE usuarios 
+                    SET nombre = %s, email = %s, rol = %s
+                    WHERE id = %s
+                    RETURNING id, nombre, email, rol, activo, fecha_registro
+                    """,
+                    (nombre, email, rol, usuario_id)
+                )
+                result = serialize_row(cur.fetchone())
+                
+                # Registrar en auditoría
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (request.current_user["sub"], "editar_usuario", "usuarios", usuario_id,
+                     f"Usuario editado: {nombre} ({email}) - rol: {rol}")
+                )
+            conn.commit()
+        return jsonify(result)
+    except psycopg2.errors.UniqueViolation:
+        return jsonify({"error": "El email ya está registrado"}), 409
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.get("/api/perfil")
+@require_auth()
+def get_perfil():
+    """Obtener perfil del usuario actual"""
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id, nombre, email, rol, activo, fecha_registro
+                    FROM usuarios WHERE id = %s
+                    """,
+                    (request.current_user["sub"],)
+                )
+                user = serialize_row(cur.fetchone())
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify(user)
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/perfil")
+@require_auth()
+def actualizar_perfil():
+    """Actualizar perfil del usuario actual"""
+    data = request.get_json(silent=True) or {}
+    nombre = (data.get("nombre") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password_actual = data.get("password_actual", "")
+    password_nueva = data.get("password_nueva", "")
+    
+    if not nombre or not email:
+        return jsonify({"error": "nombre y email son requeridos"}), 400
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Obtener datos actuales
+                cur.execute(
+                    "SELECT password_hash FROM usuarios WHERE id = %s",
+                    (request.current_user["sub"],)
+                )
+                user = cur.fetchone()
+                if not user:
+                    return jsonify({"error": "Usuario no encontrado"}), 404
+                
+                # Si quiere cambiar contraseña, verificar la actual
+                if password_nueva:
+                    if not password_actual:
+                        return jsonify({"error": "Debes proporcionar tu contraseña actual"}), 400
+                    if not bcrypt.checkpw(password_actual.encode(), user["password_hash"].encode()):
+                        return jsonify({"error": "Contraseña actual incorrecta"}), 401
+                    if len(password_nueva) < 6:
+                        return jsonify({"error": "La nueva contraseña debe tener al menos 6 caracteres"}), 400
+                    
+                    # Actualizar con nueva contraseña
+                    password_hash = bcrypt.hashpw(password_nueva.encode(), bcrypt.gensalt()).decode()
+                    cur.execute(
+                        """
+                        UPDATE usuarios 
+                        SET nombre = %s, email = %s, password_hash = %s
+                        WHERE id = %s
+                        RETURNING id, nombre, email, rol
+                        """,
+                        (nombre, email, password_hash, request.current_user["sub"])
+                    )
+                else:
+                    # Actualizar sin cambiar contraseña
+                    cur.execute(
+                        """
+                        UPDATE usuarios 
+                        SET nombre = %s, email = %s
+                        WHERE id = %s
+                        RETURNING id, nombre, email, rol
+                        """,
+                        (nombre, email, request.current_user["sub"])
+                    )
+                
+                result = serialize_row(cur.fetchone())
+                
+                # Registrar en auditoría
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (request.current_user["sub"], "actualizar_perfil", "usuarios", request.current_user["sub"],
+                     f"Perfil actualizado: {nombre} ({email})" + (" - contraseña cambiada" if password_nueva else ""))
+                )
+            conn.commit()
+        
+        # Generar nuevo token con datos actualizados
+        token = create_token(result["id"], result["nombre"], result["email"], result["rol"])
+        return jsonify({"token": token, "user": result})
+    except psycopg2.errors.UniqueViolation:
+        return jsonify({"error": "El email ya está registrado"}), 409
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.get("/api/admin/auditoria")
+@require_auth(roles=["admin"])
+def get_auditoria():
+    """Obtener registros de auditoría"""
+    limite = request.args.get("limite", 100, type=int)
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT a.id, a.usuario_id, a.accion, a.tabla_afectada, 
+                           a.registro_id, a.detalles, a.ip_address, a.fecha,
+                           u.nombre AS usuario_nombre, u.email AS usuario_email
+                    FROM auditoria a
+                    LEFT JOIN usuarios u ON u.id = a.usuario_id
+                    ORDER BY a.fecha DESC
+                    LIMIT %s
+                    """,
+                    (limite,)
+                )
+                rows = [serialize_row(r) for r in cur.fetchall()]
+        return jsonify(rows)
     except psycopg2.Error as e:
         return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
 
