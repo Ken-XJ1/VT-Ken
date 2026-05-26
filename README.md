@@ -108,7 +108,7 @@ vigilancia-tropical/
    - Abrir navegador en: `http://localhost:8000`
    - API documentation: `http://localhost:8000/docs`
 
-## 🔧 Configuración
+##  Configuración
 
 ### Variables de Entorno
 
@@ -320,7 +320,7 @@ El sistema está optimizado para:
 
 Este proyecto está bajo licencia MIT License - ver archivo LICENSE para detalles.
 
-## 📞 Contacto
+## Contacto
 
 - **Desarrollador Principal**: [Nombre del desarrollador]
 - **Email**: [email de contacto]
