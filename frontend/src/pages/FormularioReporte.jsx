@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMunicipios, crearReporte } from '../api/api';
+import BackButton from '../components/BackButton';
 
 const SINTOMAS_LISTA = [
   'Fiebre alta',
@@ -33,6 +34,10 @@ export default function FormularioReporte() {
     enfermedad_sospechosa: '',
     sintomas_detalle: '',
     nivel_urgencia: 'normal',
+    nombre_paciente: '',
+    direccion: '',
+    barrio: '',
+    telefono: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -76,6 +81,10 @@ export default function FormularioReporte() {
         enfermedad_sospechosa: form.enfermedad_sospechosa || null,
         sintomas: sintomasTexto,
         nivel_urgencia: form.nivel_urgencia,
+        nombre_paciente: form.nombre_paciente || null,
+        direccion: form.direccion || null,
+        barrio: form.barrio || null,
+        telefono: form.telefono || null,
       });
       setExito(true);
     } catch (err) {
@@ -100,7 +109,21 @@ export default function FormularioReporte() {
           </p>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => { setExito(false); setSintomasCheck([]); setForm({ municipio_id: '', nombre_reporte: '', enfermedad_sospechosa: '', sintomas_detalle: '', nivel_urgencia: 'normal' }); }}
+              onClick={() => { 
+                setExito(false); 
+                setSintomasCheck([]); 
+                setForm({ 
+                  municipio_id: '', 
+                  nombre_reporte: '', 
+                  enfermedad_sospechosa: '', 
+                  sintomas_detalle: '', 
+                  nivel_urgencia: 'normal',
+                  nombre_paciente: '',
+                  direccion: '',
+                  barrio: '',
+                  telefono: '',
+                }); 
+              }}
               className="border border-gray-600 text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-colors"
             >
               Enviar otro
@@ -120,6 +143,7 @@ export default function FormularioReporte() {
   return (
     <main className="min-h-screen bg-gray-900">
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <BackButton />
         <h1 className="text-3xl font-bold text-white mb-2">Reportar síntomas</h1>
         <p className="text-gray-400 mb-8">
           Tu reporte ayuda al sistema de vigilancia epidemiológica del Chocó.
@@ -132,6 +156,73 @@ export default function FormularioReporte() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Datos del paciente */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Datos del paciente</h3>
+            
+            <div>
+              <label htmlFor="nombre_paciente" className="block text-sm font-medium text-gray-300 mb-1">
+                Nombre completo del paciente
+              </label>
+              <input
+                id="nombre_paciente"
+                name="nombre_paciente"
+                type="text"
+                value={form.nombre_paciente}
+                onChange={handleChange}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500"
+                placeholder="Ej: Juan Pérez García"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="direccion" className="block text-sm font-medium text-gray-300 mb-1">
+                Dirección de domicilio
+              </label>
+              <input
+                id="direccion"
+                name="direccion"
+                type="text"
+                value={form.direccion}
+                onChange={handleChange}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500"
+                placeholder="Ej: Calle 5 #12-34"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="barrio" className="block text-sm font-medium text-gray-300 mb-1">
+                  Barrio
+                </label>
+                <input
+                  id="barrio"
+                  name="barrio"
+                  type="text"
+                  value={form.barrio}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500"
+                  placeholder="Ej: Centro"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="telefono" className="block text-sm font-medium text-gray-300 mb-1">
+                  Teléfono de contacto
+                </label>
+                <input
+                  id="telefono"
+                  name="telefono"
+                  type="tel"
+                  value={form.telefono}
+                  onChange={handleChange}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500"
+                  placeholder="Ej: 3001234567"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Municipio */}
           <div>
             <label htmlFor="municipio_id" className="block text-sm font-medium text-gray-300 mb-1">

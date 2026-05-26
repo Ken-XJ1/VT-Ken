@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getMisReportes } from '../api/api';
+import BackButton from '../components/BackButton';
 
 const ESTADO_STYLES = {
   pendiente: { badge: 'bg-orange-900/40 text-orange-300 border-orange-700', label: 'Pendiente' },
@@ -26,9 +27,16 @@ export default function MisReportes() {
       .finally(() => setLoading(false));
   }, []);
 
+  function formatearFecha(fecha) {
+    if (!fecha) return 'No especificada';
+    const d = new Date(fecha);
+    return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
   return (
     <main className="min-h-screen bg-gray-900">
       <div className="max-w-3xl mx-auto px-4 py-8">
+        <BackButton />
         <h1 className="text-3xl font-bold text-white mb-2">Mis reportes</h1>
         <p className="text-gray-400 mb-8">Historial de reportes de síntomas enviados.</p>
 
@@ -47,6 +55,8 @@ export default function MisReportes() {
           {reportes.map((r) => {
             const estado = ESTADO_STYLES[r.estado] || ESTADO_STYLES.pendiente;
             const abierto = expandido === r.id;
+            const tieneOrden = r.enfermedad_confirmada && r.estado !== 'pendiente';
+            
             return (
               <article key={r.id} className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
                 <div className="p-4">
@@ -71,17 +81,63 @@ export default function MisReportes() {
 
                   <p className="text-sm text-gray-300 mt-3 line-clamp-2">{r.sintomas}</p>
 
-                  {r.respuesta_admin && (
+                  {(r.respuesta_admin || tieneOrden) && (
                     <button
                       onClick={() => setExpandido(abierto ? null : r.id)}
                       className="mt-3 text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
                     >
-                      {abierto ? 'Ocultar respuesta' : 'Ver respuesta del equipo de salud'}
+                      {abierto ? 'Ocultar respuesta' : tieneOrden ? 'Ver orden de atención' : 'Ver respuesta del equipo de salud'}
                     </button>
                   )}
                 </div>
 
-                {abierto && r.respuesta_admin && (
+                {abierto && tieneOrden && (
+                  <div className="border-t border-gray-700 bg-gray-900 px-6 py-5 font-mono text-xs">
+                    <div className="text-emerald-400 font-bold text-sm mb-2">
+                      ORDEN DE ATENCIÓN — Vigilancia Tropical
+                    </div>
+                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    
+                    <div className="space-y-1 text-gray-300 mb-3">
+                      <p><span className="text-gray-500">Paciente:</span> {r.nombre_paciente || 'No especificado'}</p>
+                      <p><span className="text-gray-500">Dirección:</span> {r.direccion ? `${r.direccion}${r.barrio ? `, ${r.barrio}` : ''}` : 'No especificada'}</p>
+                      <p><span className="text-gray-500">Teléfono:</span> {r.telefono || 'No especificado'}</p>
+                      <p><span className="text-gray-500">Municipio:</span> {r.municipio || 'No especificado'}</p>
+                    </div>
+
+                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    
+                    <div className="space-y-1 text-gray-300 mb-3">
+                      <p><span className="text-gray-500">Diagnóstico preliminar:</span> <span className="text-emerald-400 font-semibold">{r.enfermedad_confirmada}</span></p>
+                      <p><span className="text-gray-500">Síntomas reportados:</span> {r.sintomas}</p>
+                      <p><span className="text-gray-500">Nivel de urgencia:</span> <span className={`font-semibold ${r.nivel_urgencia === 'critico' ? 'text-red-400' : r.nivel_urgencia === 'urgente' ? 'text-yellow-400' : 'text-gray-400'}`}>{r.nivel_urgencia.toUpperCase()}</span></p>
+                    </div>
+
+                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    
+                    <div className="text-gray-300 mb-3">
+                      <p className="text-emerald-400 font-semibold mb-2">PLAN DE ATENCIÓN:</p>
+                      <p className="mb-2">Se enviará un equipo de salud a su domicilio en {r.direccion || 'la dirección registrada'}{r.barrio ? `, ${r.barrio}` : ''}.</p>
+                      <p className="mb-2"><span className="text-gray-500">Fecha estimada de atención:</span> <span className="text-white font-semibold">{formatearFecha(r.fecha_estimada_atencion)}</span></p>
+                      {r.respuesta_admin && (
+                        <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-700">
+                          <p className="text-gray-400 text-xs mb-1">Instrucciones adicionales:</p>
+                          <p className="text-gray-200">{r.respuesta_admin}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    
+                    <div className="text-gray-500 text-xs">
+                      <p>Emitido por: Sistema Vigilancia Tropical — Chocó</p>
+                      <p>Fecha: {formatearFecha(r.fecha_respuesta)}</p>
+                      <p>Folio: <span className="text-emerald-400">VT-{r.id}</span></p>
+                    </div>
+                  </div>
+                )}
+
+                {abierto && r.respuesta_admin && !tieneOrden && (
                   <div className="border-t border-gray-700 bg-blue-900/10 px-4 py-3">
                     <p className="text-xs font-semibold text-blue-400 mb-1">
                       Respuesta del equipo de salud · {r.fecha_respuesta?.slice(0, 10)}

@@ -393,6 +393,12 @@ def crear_reporte():
     enfermedad_sospechosa = (data.get("enfermedad_sospechosa") or "").strip() or None
     nivel_urgencia = data.get("nivel_urgencia", "normal")
     nombre_reporte = (data.get("nombre_reporte") or "").strip() or None
+    
+    # Nuevos campos
+    nombre_paciente = (data.get("nombre_paciente") or "").strip() or None
+    direccion = (data.get("direccion") or "").strip() or None
+    barrio = (data.get("barrio") or "").strip() or None
+    telefono = (data.get("telefono") or "").strip() or None
 
     if nivel_urgencia not in ("normal", "urgente", "critico"):
         nivel_urgencia = "normal"
@@ -406,12 +412,14 @@ def crear_reporte():
                     """
                     INSERT INTO reportes_sintomas
                         (usuario_id, nombre_reporte, municipio_id, sintomas,
-                         enfermedad_sospechosa, nivel_urgencia)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                         enfermedad_sospechosa, nivel_urgencia,
+                         nombre_paciente, direccion, barrio, telefono)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     RETURNING id, fecha_reporte, estado
                     """,
                     (usuario_id, nombre_reporte, municipio_id, sintomas,
-                     enfermedad_sospechosa, nivel_urgencia),
+                     enfermedad_sospechosa, nivel_urgencia,
+                     nombre_paciente, direccion, barrio, telefono),
                 )
                 row = serialize_row(cur.fetchone())
             conn.commit()
@@ -434,7 +442,9 @@ def list_reportes():
                                r.nivel_urgencia, r.estado, r.respuesta_admin,
                                r.fecha_reporte, r.fecha_respuesta,
                                r.municipio_id, m.nombre AS municipio,
-                               r.usuario_id, us.nombre AS usuario, us.email AS usuario_email
+                               r.usuario_id, us.nombre AS usuario, us.email AS usuario_email,
+                               r.nombre_paciente, r.direccion, r.barrio, r.telefono,
+                               r.enfermedad_confirmada, r.fecha_estimada_atencion
                         FROM reportes_sintomas r
                         LEFT JOIN municipios m ON m.id = r.municipio_id
                         LEFT JOIN usuarios us ON us.id = r.usuario_id
@@ -447,7 +457,9 @@ def list_reportes():
                         SELECT r.id, r.nombre_reporte, r.sintomas, r.enfermedad_sospechosa,
                                r.nivel_urgencia, r.estado, r.respuesta_admin,
                                r.fecha_reporte, r.fecha_respuesta,
-                               r.municipio_id, m.nombre AS municipio
+                               r.municipio_id, m.nombre AS municipio,
+                               r.nombre_paciente, r.direccion, r.barrio, r.telefono,
+                               r.enfermedad_confirmada, r.fecha_estimada_atencion
                         FROM reportes_sintomas r
                         LEFT JOIN municipios m ON m.id = r.municipio_id
                         WHERE r.usuario_id = %s
@@ -467,6 +479,8 @@ def responder_reporte(reporte_id):
     data = request.get_json(silent=True) or {}
     respuesta = (data.get("respuesta_admin") or "").strip()
     estado = data.get("estado", "revisado")
+    enfermedad_confirmada = (data.get("enfermedad_confirmada") or "").strip() or None
+    fecha_estimada_atencion = data.get("fecha_estimada_atencion") or None
 
     if estado not in ("pendiente", "revisado", "cerrado"):
         estado = "revisado"
@@ -474,19 +488,71 @@ def responder_reporte(reporte_id):
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
+                # Actualizar el reporte
                 cur.execute(
                     """
                     UPDATE reportes_sintomas
-                    SET respuesta_admin = %s, estado = %s, fecha_respuesta = NOW()
+                    SET respuesta_admin = %s, estado = %s, fecha_respuesta = NOW(),
+                        enfermedad_confirmada = %s, fecha_estimada_atencion = %s
                     WHERE id = %s
-                    RETURNING id, estado, fecha_respuesta
+                    RETURNING id, estado, fecha_respuesta, municipio_id, enfermedad_confirmada
                     """,
-                    (respuesta, estado, reporte_id),
+                    (respuesta, estado, enfermedad_confirmada, fecha_estimada_atencion, reporte_id),
                 )
                 row = cur.fetchone()
                 if not row:
                     return jsonify({"error": "Reporte no encontrado"}), 404
                 result = serialize_row(row)
+                
+                # Si se confirmó una enfermedad específica, crear brote y actualizar predicción
+                if enfermedad_confirmada and enfermedad_confirmada not in ("Descartado", "Pendiente confirmación"):
+                    municipio_id = row["municipio_id"]
+                    
+                    # Obtener enfermedad_id
+                    cur.execute(
+                        "SELECT id FROM enfermedades WHERE nombre = %s",
+                        (enfermedad_confirmada,)
+                    )
+                    enfermedad_row = cur.fetchone()
+                    
+                    if enfermedad_row and municipio_id:
+                        enfermedad_id = enfermedad_row["id"]
+                        
+                        # Obtener coordenadas del municipio
+                        cur.execute(
+                            "SELECT lat, lng FROM municipios WHERE id = %s",
+                            (municipio_id,)
+                        )
+                        municipio_coords = cur.fetchone()
+                        
+                        if municipio_coords:
+                            # Insertar brote
+                            cur.execute(
+                                """
+                                INSERT INTO brotes (municipio_id, enfermedad_id, fecha, numero_casos, fuente, lat, lng)
+                                VALUES (%s, %s, CURRENT_DATE, 1, %s, %s, %s)
+                                """,
+                                (municipio_id, enfermedad_id, f"Reporte ciudadano confirmado — VT-{reporte_id}",
+                                 municipio_coords["lat"], municipio_coords["lng"])
+                            )
+                            
+                            # Actualizar o insertar predicción
+                            cur.execute(
+                                """
+                                INSERT INTO predicciones (municipio_id, enfermedad_id, fecha_prediccion, probabilidad, nivel_riesgo)
+                                VALUES (%s, %s, CURRENT_DATE, 5, 'bajo')
+                                ON CONFLICT (municipio_id, enfermedad_id, fecha_prediccion)
+                                DO UPDATE SET 
+                                    probabilidad = LEAST(predicciones.probabilidad + 5, 100),
+                                    nivel_riesgo = CASE
+                                        WHEN LEAST(predicciones.probabilidad + 5, 100) >= 70 THEN 'alto'
+                                        WHEN LEAST(predicciones.probabilidad + 5, 100) >= 40 THEN 'medio'
+                                        ELSE 'bajo'
+                                    END
+                                """,
+                                (municipio_id, enfermedad_id)
+                            )
+                
             conn.commit()
         return jsonify({"mensaje": "Respuesta guardada", "reporte": result})
     except psycopg2.Error as e:
@@ -620,26 +686,31 @@ def admin_stats():
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'ciudadano'")
+                # Total usuarios ciudadanos activos
+                cur.execute("SELECT COUNT(*) AS total FROM usuarios WHERE rol = 'ciudadano' AND activo = true")
                 total_usuarios = cur.fetchone()["total"]
 
+                # Total reportes
                 cur.execute("SELECT COUNT(*) AS total FROM reportes_sintomas")
                 total_reportes = cur.fetchone()["total"]
 
+                # Reportes pendientes
                 cur.execute("SELECT COUNT(*) AS total FROM reportes_sintomas WHERE estado = 'pendiente'")
                 reportes_pendientes = cur.fetchone()["total"]
 
+                # Total mensajes
                 cur.execute("SELECT COUNT(*) AS total FROM mensajes")
                 total_mensajes = cur.fetchone()["total"]
 
+                # Mensajes sin leer
                 cur.execute("SELECT COUNT(*) AS total FROM mensajes WHERE leido = false")
                 mensajes_no_leidos = cur.fetchone()["total"]
 
+                # Brotes este mes
+                mes_actual = datetime.now().strftime('%Y-%m')
                 cur.execute(
-                    """
-                    SELECT COUNT(*) AS total FROM brotes
-                    WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE)
-                    """
+                    "SELECT COUNT(*) AS total FROM brotes WHERE TO_CHAR(fecha, 'YYYY-MM') = %s",
+                    (mes_actual,)
                 )
                 brotes_este_mes = cur.fetchone()["total"]
 

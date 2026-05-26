@@ -89,7 +89,13 @@ CREATE TABLE IF NOT EXISTS reportes_sintomas (
     estado VARCHAR(20) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'revisado', 'cerrado')),
     respuesta_admin TEXT,
     fecha_reporte TIMESTAMP NOT NULL DEFAULT NOW(),
-    fecha_respuesta TIMESTAMP
+    fecha_respuesta TIMESTAMP,
+    nombre_paciente VARCHAR(150),
+    direccion VARCHAR(250),
+    barrio VARCHAR(100),
+    telefono VARCHAR(20),
+    enfermedad_confirmada VARCHAR(80),
+    fecha_estimada_atencion DATE
 );
 
 -- Mensajes de ciudadanos al administrador
