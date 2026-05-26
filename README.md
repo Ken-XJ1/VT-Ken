@@ -2,11 +2,11 @@
 
 Sistema de monitoreo de enfermedades tropicales para Quibdó, Chocó - Colombia
 
-## 📋 Descripción del Proyecto
+##  Descripción del Proyecto
 
 **Vigilancia Tropical** es una plataforma web integral para el monitoreo, análisis y predicción de enfermedades tropicales en el municipio de Quibdó, departamento del Chocó. El sistema proporciona herramientas de vigilancia epidemiológica en tiempo real, mapas interactivos de distribución de casos, y modelos predictivos basados en machine learning para anticipar brotes.
 
-### 🎯 Objetivos Principales
+###  Objetivos Principales
 
 - **Monitoreo en tiempo real** de enfermedades tropicales (Dengue, Malaria, Zika, Chikungunya)
 - **Visualización geográfica** de casos y zonas de riesgo mediante mapas interactivos
@@ -14,7 +14,7 @@ Sistema de monitoreo de enfermedades tropicales para Quibdó, Chocó - Colombia
 - **Alertas tempranas** basadas en datos epidemiológicos y ambientales
 - **Soporte a la toma de decisiones** para autoridades sanitarias locales
 
-## 🏗️ Arquitectura del Sistema
+##  Arquitectura del Sistema
 
 ### Frontend
 - **Tecnologías**: HTML5, CSS3, JavaScript (ES6+)
@@ -40,7 +40,7 @@ Sistema de monitoreo de enfermedades tropicales para Quibdó, Chocó - Colombia
 - **Actualización**: Datos simulados con patrones realistas
 - **Calidad**: Validación automática de integridad
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 vigilancia-tropical/
@@ -64,7 +64,7 @@ vigilancia-tropical/
 └── README.md                 # Este archivo
 ```
 
-## 🚀 Instalación y Configuración
+##  Instalación y Configuración
 
 ### Prerrequisitos
 
@@ -128,7 +128,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 2. Actualizar modelos de datos según schema de base de datos
 3. Configurar connection string en variables de entorno
 
-## 📊 Funcionalidades
+##  Funcionalidades
 
 ### 1. Dashboard Principal
 - **Estadísticas en tiempo real**: Casos activos, zonas de riesgo, alertas
@@ -157,7 +157,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 - **Validación**: Verificación automática de calidad de datos
 - **Exportación**: Descarga de reportes en múltiples formatos
 
-## 🌐 API Endpoints
+##  API Endpoints
 
 ### Datos Epidemiológicos
 - `GET /api/disease-data/{disease}` - Datos por enfermedad
@@ -180,7 +180,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 - `GET /api/health` - Estado del sistema
 - `GET /api/diseases` - Información de enfermedades
 
-## 🧪 Modelos Predictivos
+##  Modelos Predictivos
 
 ### Algoritmos Utilizados
 
@@ -217,7 +217,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 - **Validación**: Hold-out set (20%)
 - **Versionamiento**: Guardar modelos con timestamp
 
-## 📈 Datos y Calidad
+##  Datos y Calidad
 
 ### Fuentes de Datos
 
@@ -243,7 +243,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 - **Normalización**: Estandarización de formatos y unidades
 - **Métricas**: Completitud, exactitud, oportunidad, consistencia
 
-## 🛡️ Seguridad
+##  Seguridad
 
 ### Medidas Implementadas
 
@@ -259,7 +259,7 @@ El sistema actualmente utiliza archivos JSON para datos. Para integración con b
 - **Base de datos**: Encriptación de datos sensibles
 - **Backup**: Respaldos automáticos de datos
 
-## 📱 Responsive Design
+##  Responsive Design
 
 El sistema está optimizado para:
 
@@ -274,7 +274,7 @@ El sistema está optimizado para:
 - **Mapa interactivo**: Zoom y gestos táctiles
 - **Dashboard**: Reorganización de widgets en pantallas pequeñas
 
-## 🔄 Actualización y Mantenimiento
+##  Actualización y Mantenimiento
 
 ### Tareas Periódicas
 
@@ -300,7 +300,7 @@ El sistema está optimizado para:
 - **Alertas del sistema**: Caídas, problemas de conectividad
 - **Uso de recursos**: CPU, memoria, almacenamiento
 
-## 🤝 Contribución
+##  Contribución
 
 ### Guidelines para Desarrolladores
 
@@ -316,7 +316,7 @@ El sistema está optimizado para:
 - **CSS**: BEM methodology para nombres de clases
 - **HTML**: Semántico y accesible
 
-## 📝 Licencia
+##  Licencia
 
 Este proyecto está bajo licencia MIT License - ver archivo LICENSE para detalles.
 
@@ -327,7 +327,7 @@ Este proyecto está bajo licencia MIT License - ver archivo LICENSE para detalle
 - **Institución**: [Nombre de la institución]
 - **Teléfono**: [+57 XXX XXX XXXX]
 
-## 🙏 Agradecimientos
+##  Agradecimientos
 
 - Secretaría de Salud de Quibdó
 - Instituto de Hidrología, Meteorología y Estudios Ambientales (IDEAM)
