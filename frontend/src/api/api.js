@@ -205,3 +205,7 @@ export function actualizarEmail(data) {
 export function actualizarPassword(data) {
   return putAuth('/api/perfil/password', data);
 }
+
+export function getMiIP() {
+  return apiGet('/api/ip');
+}

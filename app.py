@@ -1204,5 +1204,14 @@ def get_auditoria():
         return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
 
 
+@app.get("/api/ip")
+def get_ip():
+    """Devuelve la IP pública del cliente que hace la petición"""
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    # X-Forwarded-For puede tener múltiples IPs separadas por coma; la primera es la del cliente
+    ip = ip.split(",")[0].strip()
+    return jsonify({"ip": ip or "desconocida"})
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

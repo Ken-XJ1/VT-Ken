@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getAuditoria } from '../../api/api';
+import { getAuditoria, getMiIP } from '../../api/api';
 import BackButton from '../../components/BackButton';
 
 const ACCION_COLORS = {
@@ -46,6 +46,7 @@ export default function AdminAuditoria() {
   const [limite, setLimite] = useState(200);
   const [filtroAccion, setFiltroAccion] = useState('');
   const [busqueda, setBusqueda] = useState('');
+  const [miIP, setMiIP] = useState('');
 
   function cargar() {
     setLoading(true);
@@ -55,7 +56,10 @@ export default function AdminAuditoria() {
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { cargar(); }, [limite]);
+  useEffect(() => {
+    cargar();
+    getMiIP().then((data) => setMiIP(data.ip)).catch(() => {});
+  }, [limite]);
 
   function formatearFecha(fecha) {
     if (!fecha) return '—';
@@ -99,16 +103,24 @@ export default function AdminAuditoria() {
               Control de accesos y acciones de todos los usuarios
             </p>
           </div>
-          <select
-            value={limite}
-            onChange={(e) => setLimite(Number(e.target.value))}
-            className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-red-500"
-          >
-            <option value={100}>Últimos 100</option>
-            <option value={200}>Últimos 200</option>
-            <option value={500}>Últimos 500</option>
-            <option value={1000}>Últimos 1000</option>
-          </select>
+          <div className="flex items-center gap-3">
+            {miIP && (
+              <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2">
+                <span className="text-xs text-gray-500 uppercase tracking-wide">Tu IP</span>
+                <span className="text-sm font-mono text-emerald-400 font-semibold">{miIP}</span>
+              </div>
+            )}
+            <select
+              value={limite}
+              onChange={(e) => setLimite(Number(e.target.value))}
+              className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-red-500"
+            >
+              <option value={100}>Últimos 100</option>
+              <option value={200}>Últimos 200</option>
+              <option value={500}>Últimos 500</option>
+              <option value={1000}>Últimos 1000</option>
+            </select>
+          </div>
         </div>
 
         {/* Resumen rápido */}
