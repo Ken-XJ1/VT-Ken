@@ -92,47 +92,83 @@ export default function MisReportes() {
                 </div>
 
                 {abierto && tieneOrden && (
-                  <div className="border-t border-gray-700 bg-gray-900 px-6 py-5 font-mono text-xs">
-                    <div className="text-emerald-400 font-bold text-sm mb-2">
-                      ORDEN DE ATENCIÓN — Vigilancia Tropical
-                    </div>
-                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                    
-                    <div className="space-y-1 text-gray-300 mb-3">
-                      <p><span className="text-gray-500">Paciente:</span> {r.nombre_paciente || 'No especificado'}</p>
-                      <p><span className="text-gray-500">Dirección:</span> {r.direccion ? `${r.direccion}${r.barrio ? `, ${r.barrio}` : ''}` : 'No especificada'}</p>
-                      <p><span className="text-gray-500">Teléfono:</span> {r.telefono || 'No especificado'}</p>
-                      <p><span className="text-gray-500">Municipio:</span> {r.municipio || 'No especificado'}</p>
-                    </div>
-
-                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                    
-                    <div className="space-y-1 text-gray-300 mb-3">
-                      <p><span className="text-gray-500">Diagnóstico preliminar:</span> <span className="text-emerald-400 font-semibold">{r.enfermedad_confirmada}</span></p>
-                      <p><span className="text-gray-500">Síntomas reportados:</span> {r.sintomas}</p>
-                      <p><span className="text-gray-500">Nivel de urgencia:</span> <span className={`font-semibold ${r.nivel_urgencia === 'critico' ? 'text-red-400' : r.nivel_urgencia === 'urgente' ? 'text-yellow-400' : 'text-gray-400'}`}>{r.nivel_urgencia.toUpperCase()}</span></p>
-                    </div>
-
-                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                    
-                    <div className="text-gray-300 mb-3">
-                      <p className="text-emerald-400 font-semibold mb-2">PLAN DE ATENCIÓN:</p>
-                      <p className="mb-2">Se enviará un equipo de salud a su domicilio en {r.direccion || 'la dirección registrada'}{r.barrio ? `, ${r.barrio}` : ''}.</p>
-                      <p className="mb-2"><span className="text-gray-500">Fecha estimada de atención:</span> <span className="text-white font-semibold">{formatearFecha(r.fecha_estimada_atencion)}</span></p>
-                      {r.respuesta_admin && (
-                        <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-700">
-                          <p className="text-gray-400 text-xs mb-1">Instrucciones adicionales:</p>
-                          <p className="text-gray-200">{r.respuesta_admin}</p>
+                  <div className="border-t border-emerald-700 bg-gray-900 px-6 py-5">
+                    <div className="border border-emerald-600 rounded-lg overflow-hidden">
+                      {/* Header con gradiente */}
+                      <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 px-4 py-3 border-b border-emerald-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-emerald-400 font-bold text-sm font-mono">ORDEN DE ATENCIÓN — VT-{r.id}</p>
+                            <p className="text-emerald-300 text-xs mt-0.5">Vigilancia Tropical · Chocó, Colombia</p>
+                          </div>
+                          <button
+                            onClick={() => window.print()}
+                            className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-1.5 rounded transition-colors"
+                          >
+                            Imprimir orden
+                          </button>
                         </div>
-                      )}
-                    </div>
+                      </div>
 
-                    <div className="text-gray-500 mb-3">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
-                    
-                    <div className="text-gray-500 text-xs">
-                      <p>Emitido por: Sistema Vigilancia Tropical — Chocó</p>
-                      <p>Fecha: {formatearFecha(r.fecha_respuesta)}</p>
-                      <p>Folio: <span className="text-emerald-400">VT-{r.id}</span></p>
+                      {/* Contenido */}
+                      <div className="bg-gray-950 px-4 py-4 font-mono text-xs space-y-4">
+                        {/* Datos del paciente */}
+                        <div>
+                          <div className="text-gray-600 mb-2">─────────────────────────────────────────────</div>
+                          <div className="space-y-1 text-gray-300">
+                            <p><span className="text-gray-500">Paciente:</span> <span className="text-white">{r.nombre_paciente || 'No especificado'}</span></p>
+                            <p><span className="text-gray-500">Dirección:</span> <span className="text-white">{r.direccion ? `${r.direccion}${r.barrio ? `, ${r.barrio}` : ''}` : 'No especificada'}</span></p>
+                            <p><span className="text-gray-500">Teléfono:</span> <span className="text-white">{r.telefono || 'No especificado'}</span></p>
+                            <p><span className="text-gray-500">Municipio:</span> <span className="text-white">{r.municipio || 'No especificado'}</span></p>
+                          </div>
+                        </div>
+
+                        {/* Diagnóstico */}
+                        <div>
+                          <div className="text-gray-600 mb-2">─────────────────────────────────────────────</div>
+                          <div className="space-y-1 text-gray-300">
+                            <p><span className="text-gray-500">Diagnóstico preliminar:</span> <span className="text-emerald-400 font-semibold">{r.enfermedad_confirmada}</span></p>
+                            <p><span className="text-gray-500">Síntomas:</span> <span className="text-white">{r.sintomas}</span></p>
+                            <p>
+                              <span className="text-gray-500">Urgencia:</span>{' '}
+                              <span className={`font-semibold ${
+                                r.nivel_urgencia === 'critico' ? 'text-red-400' : 
+                                r.nivel_urgencia === 'urgente' ? 'text-yellow-400' : 
+                                'text-gray-400'
+                              }`}>
+                                {r.nivel_urgencia.toUpperCase()}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Plan de atención */}
+                        <div>
+                          <div className="text-gray-600 mb-2">─────────────────────────────────────────────</div>
+                          <div className="text-gray-300">
+                            <p className="text-emerald-400 font-semibold mb-2">PLAN DE ATENCIÓN:</p>
+                            <p className="mb-2">Se enviará un equipo de salud a su domicilio.</p>
+                            <p className="mb-2">
+                              <span className="text-gray-500">Fecha estimada:</span>{' '}
+                              <span className="text-white font-semibold">{formatearFecha(r.fecha_estimada_atencion)}</span>
+                            </p>
+                            {r.respuesta_admin && (
+                              <div className="mt-3">
+                                <p className="text-gray-500 mb-1">Nota del equipo:</p>
+                                <p className="text-gray-200 bg-gray-900 p-2 rounded border border-gray-800">{r.respuesta_admin}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div>
+                          <div className="text-gray-600 mb-2">─────────────────────────────────────────────</div>
+                          <div className="text-gray-500 text-xs">
+                            <p>Emitido: {formatearFecha(r.fecha_respuesta)}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTodosReportes, responderReporte } from '../../api/api';
+import BackButton from '../../components/BackButton';
 
 const ESTADO_STYLES = {
   pendiente: 'bg-orange-900/40 text-orange-300 border-orange-700',
@@ -22,6 +23,8 @@ export default function AdminReportes() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [respuesta, setRespuesta] = useState('');
   const [nuevoEstado, setNuevoEstado] = useState('revisado');
+  const [enfermedadConfirmada, setEnfermedadConfirmada] = useState('');
+  const [fechaEstimada, setFechaEstimada] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [guardadoMsg, setGuardadoMsg] = useState('');
 
@@ -39,6 +42,8 @@ export default function AdminReportes() {
     setSeleccionado(r);
     setRespuesta(r.respuesta_admin || '');
     setNuevoEstado(r.estado === 'pendiente' ? 'revisado' : r.estado);
+    setEnfermedadConfirmada(r.enfermedad_confirmada || '');
+    setFechaEstimada(r.fecha_estimada_atencion || '');
     setGuardadoMsg('');
   }
 
@@ -47,10 +52,21 @@ export default function AdminReportes() {
     setGuardando(true);
     setGuardadoMsg('');
     try {
-      await responderReporte(seleccionado.id, { respuesta_admin: respuesta, estado: nuevoEstado });
+      await responderReporte(seleccionado.id, { 
+        respuesta_admin: respuesta, 
+        estado: nuevoEstado,
+        enfermedad_confirmada: enfermedadConfirmada || null,
+        fecha_estimada_atencion: fechaEstimada || null,
+      });
       setGuardadoMsg('Respuesta guardada correctamente');
       cargar();
-      setSeleccionado((prev) => ({ ...prev, respuesta_admin: respuesta, estado: nuevoEstado }));
+      setSeleccionado((prev) => ({ 
+        ...prev, 
+        respuesta_admin: respuesta, 
+        estado: nuevoEstado,
+        enfermedad_confirmada: enfermedadConfirmada,
+        fecha_estimada_atencion: fechaEstimada,
+      }));
     } catch (err) {
       setGuardadoMsg(`Error: ${err.message}`);
     } finally {
@@ -69,6 +85,7 @@ export default function AdminReportes() {
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-6">
         {/* Lista */}
         <div className="flex-1 min-w-0">
+          <BackButton />
           <h1 className="text-2xl font-bold text-white mb-2">Reportes de síntomas</h1>
           <p className="text-gray-400 text-sm mb-6">Gestiona y responde los reportes de ciudadanos.</p>
 
@@ -147,8 +164,11 @@ export default function AdminReportes() {
             <div className="space-y-3 text-sm mb-5">
               <div><span className="text-gray-400">Usuario:</span> <span className="text-white">{seleccionado.usuario || 'Anónimo'}</span></div>
               <div><span className="text-gray-400">Email:</span> <span className="text-white">{seleccionado.usuario_email || '—'}</span></div>
+              <div><span className="text-gray-400">Paciente:</span> <span className="text-white">{seleccionado.nombre_paciente || '—'}</span></div>
+              <div><span className="text-gray-400">Dirección:</span> <span className="text-white">{seleccionado.direccion ? `${seleccionado.direccion}${seleccionado.barrio ? `, ${seleccionado.barrio}` : ''}` : '—'}</span></div>
+              <div><span className="text-gray-400">Teléfono:</span> <span className="text-white">{seleccionado.telefono || '—'}</span></div>
               <div><span className="text-gray-400">Municipio:</span> <span className="text-white">{seleccionado.municipio || '—'}</span></div>
-              <div><span className="text-gray-400">Enfermedad:</span> <span className="text-white">{seleccionado.enfermedad_sospechosa || '—'}</span></div>
+              <div><span className="text-gray-400">Enfermedad sospechosa:</span> <span className="text-white">{seleccionado.enfermedad_sospechosa || '—'}</span></div>
               <div><span className="text-gray-400">Urgencia:</span> <span className={`text-xs px-2 py-0.5 rounded-full ml-1 ${URGENCIA_STYLES[seleccionado.nivel_urgencia]}`}>{seleccionado.nivel_urgencia}</span></div>
               <div><span className="text-gray-400">Fecha:</span> <span className="text-white">{seleccionado.fecha_reporte?.slice(0, 16).replace('T', ' ')}</span></div>
               <div>
@@ -158,6 +178,33 @@ export default function AdminReportes() {
             </div>
 
             <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Enfermedad confirmada</label>
+                <select
+                  value={enfermedadConfirmada}
+                  onChange={(e) => setEnfermedadConfirmada(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="Dengue">Dengue</option>
+                  <option value="Malaria">Malaria</option>
+                  <option value="Zika">Zika</option>
+                  <option value="Chikungunya">Chikungunya</option>
+                  <option value="Descartado">Descartado</option>
+                  <option value="Pendiente confirmación">Pendiente confirmación</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Fecha estimada de atención</label>
+                <input
+                  type="date"
+                  value={fechaEstimada}
+                  onChange={(e) => setFechaEstimada(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Respuesta al ciudadano</label>
                 <textarea

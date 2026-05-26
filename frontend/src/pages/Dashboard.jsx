@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getMisReportes, getMisMensajes } from '../api/api';
+import BackButton from '../components/BackButton';
 
 const ESTADO_STYLES = {
   pendiente: 'bg-orange-900/40 text-orange-300 border-orange-700',
@@ -44,6 +45,7 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-gray-900">
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <BackButton />
         {/* Saludo */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">

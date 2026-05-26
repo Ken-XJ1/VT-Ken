@@ -505,57 +505,87 @@ def responder_reporte(reporte_id):
                 result = serialize_row(row)
                 
                 # Si se confirmó una enfermedad específica, crear brote y actualizar predicción
-                if enfermedad_confirmada and enfermedad_confirmada not in ("Descartado", "Pendiente confirmación"):
+                enfermedades_validas = ['Dengue', 'Malaria', 'Zika', 'Chikungunya']
+                if enfermedad_confirmada and enfermedad_confirmada in enfermedades_validas:
                     municipio_id = row["municipio_id"]
                     
-                    # Obtener enfermedad_id
-                    cur.execute(
-                        "SELECT id FROM enfermedades WHERE nombre = %s",
-                        (enfermedad_confirmada,)
-                    )
-                    enfermedad_row = cur.fetchone()
-                    
-                    if enfermedad_row and municipio_id:
-                        enfermedad_id = enfermedad_row["id"]
-                        
-                        # Obtener coordenadas del municipio
+                    if municipio_id:
+                        # Obtener enfermedad_id
                         cur.execute(
-                            "SELECT lat, lng FROM municipios WHERE id = %s",
-                            (municipio_id,)
+                            "SELECT id FROM enfermedades WHERE nombre = %s",
+                            (enfermedad_confirmada,)
                         )
-                        municipio_coords = cur.fetchone()
+                        enfermedad_row = cur.fetchone()
                         
-                        if municipio_coords:
-                            # Insertar brote
-                            cur.execute(
-                                """
-                                INSERT INTO brotes (municipio_id, enfermedad_id, fecha, numero_casos, fuente, lat, lng)
-                                VALUES (%s, %s, CURRENT_DATE, 1, %s, %s, %s)
-                                """,
-                                (municipio_id, enfermedad_id, f"Reporte ciudadano confirmado — VT-{reporte_id}",
-                                 municipio_coords["lat"], municipio_coords["lng"])
-                            )
+                        if enfermedad_row:
+                            enfermedad_id = enfermedad_row["id"]
                             
-                            # Actualizar o insertar predicción
+                            # Obtener coordenadas del municipio
                             cur.execute(
-                                """
-                                INSERT INTO predicciones (municipio_id, enfermedad_id, fecha_prediccion, probabilidad, nivel_riesgo)
-                                VALUES (%s, %s, CURRENT_DATE, 5, 'bajo')
-                                ON CONFLICT (municipio_id, enfermedad_id, fecha_prediccion)
-                                DO UPDATE SET 
-                                    probabilidad = LEAST(predicciones.probabilidad + 5, 100),
-                                    nivel_riesgo = CASE
-                                        WHEN LEAST(predicciones.probabilidad + 5, 100) >= 70 THEN 'alto'
-                                        WHEN LEAST(predicciones.probabilidad + 5, 100) >= 40 THEN 'medio'
-                                        ELSE 'bajo'
-                                    END
-                                """,
-                                (municipio_id, enfermedad_id)
+                                "SELECT lat, lng FROM municipios WHERE id = %s",
+                                (municipio_id,)
                             )
+                            municipio_coords = cur.fetchone()
+                            
+                            if municipio_coords:
+                                # Insertar brote
+                                cur.execute(
+                                    """
+                                    INSERT INTO brotes (municipio_id, enfermedad_id, fecha, numero_casos, fuente, lat, lng)
+                                    VALUES (%s, %s, CURRENT_DATE, 1, %s, %s, %s)
+                                    """,
+                                    (municipio_id, enfermedad_id, f"Reporte ciudadano confirmado — VT-{reporte_id}",
+                                     municipio_coords["lat"], municipio_coords["lng"])
+                                )
+                                
+                                print(f"[INFO] Brote creado: {enfermedad_confirmada} en municipio {municipio_id} (VT-{reporte_id})")
+                                
+                                # Actualizar o insertar predicción
+                                cur.execute(
+                                    """
+                                    SELECT id, probabilidad FROM predicciones 
+                                    WHERE municipio_id = %s AND enfermedad_id = %s 
+                                    AND fecha_prediccion = CURRENT_DATE
+                                    """,
+                                    (municipio_id, enfermedad_id)
+                                )
+                                pred_existente = cur.fetchone()
+                                
+                                if pred_existente:
+                                    # Actualizar predicción existente
+                                    nueva_prob = min(pred_existente["probabilidad"] + 5, 100)
+                                    if nueva_prob >= 70:
+                                        nivel = 'alto'
+                                    elif nueva_prob >= 40:
+                                        nivel = 'medio'
+                                    else:
+                                        nivel = 'bajo'
+                                    
+                                    cur.execute(
+                                        """
+                                        UPDATE predicciones 
+                                        SET probabilidad = %s, nivel_riesgo = %s
+                                        WHERE id = %s
+                                        """,
+                                        (nueva_prob, nivel, pred_existente["id"])
+                                    )
+                                    print(f"[INFO] Predicción actualizada: probabilidad {nueva_prob}%, nivel {nivel}")
+                                else:
+                                    # Insertar nueva predicción
+                                    cur.execute(
+                                        """
+                                        INSERT INTO predicciones (municipio_id, enfermedad_id, fecha_prediccion, probabilidad, nivel_riesgo)
+                                        VALUES (%s, %s, CURRENT_DATE, 5, 'bajo')
+                                        """,
+                                        (municipio_id, enfermedad_id)
+                                    )
+                                    print(f"[INFO] Predicción creada: probabilidad 5%, nivel bajo")
                 
             conn.commit()
+            print(f"[INFO] Respuesta guardada para reporte VT-{reporte_id}")
         return jsonify({"mensaje": "Respuesta guardada", "reporte": result})
     except psycopg2.Error as e:
+        print(f"[ERROR] Error en responder_reporte: {str(e)}")
         return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
 
 

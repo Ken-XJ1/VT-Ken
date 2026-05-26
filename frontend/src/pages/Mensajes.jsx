@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getMisMensajes, enviarMensaje } from '../api/api';
+import BackButton from '../components/BackButton';
 
 export default function Mensajes() {
   const [mensajes, setMensajes] = useState([]);
@@ -48,6 +49,7 @@ export default function Mensajes() {
   return (
     <main className="min-h-screen bg-gray-900">
       <div className="max-w-3xl mx-auto px-4 py-8">
+        <BackButton />
         <h1 className="text-3xl font-bold text-white mb-2">Mensajes</h1>
         <p className="text-gray-400 mb-8">Comunícate con el equipo de salud de Vigilancia Tropical.</p>
 

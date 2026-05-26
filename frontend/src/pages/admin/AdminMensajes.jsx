@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getTodosMensajes, responderMensaje, marcarMensajeLeido } from '../../api/api';
+import BackButton from '../../components/BackButton';
 
 export default function AdminMensajes() {
   const [mensajes, setMensajes] = useState([]);
@@ -58,6 +59,7 @@ export default function AdminMensajes() {
       <div className="max-w-7xl mx-auto px-4 py-8 flex gap-6">
         {/* Lista */}
         <div className="flex-1 min-w-0">
+          <BackButton />
           <h1 className="text-2xl font-bold text-white mb-2">Mensajes de ciudadanos</h1>
           <p className="text-gray-400 text-sm mb-6">Revisa y responde los mensajes recibidos.</p>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAdminStats, getTodosReportes, getTodosMensajes } from '../../api/api';
+import BackButton from '../../components/BackButton';
 
 const ESTADO_STYLES = {
   pendiente: 'bg-orange-900/40 text-orange-300',
@@ -74,6 +75,7 @@ export default function AdminPanel() {
   return (
     <main className="min-h-screen bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 py-8">
+        <BackButton />
         <h1 className="text-3xl font-bold text-white mb-2">Panel de administrador</h1>
         <p className="text-gray-400 mb-8">Resumen del sistema de vigilancia epidemiológica.</p>
 
