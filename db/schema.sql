@@ -70,8 +70,16 @@ CREATE INDEX idx_predicciones_municipio ON predicciones(municipio_id, fecha_pred
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100),
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    telefono VARCHAR(20),
+    fecha_nacimiento DATE,
+    genero VARCHAR(20),
+    direccion VARCHAR(250),
+    barrio VARCHAR(100),
+    municipio_id INTEGER REFERENCES municipios(id),
+    ocupacion VARCHAR(100),
     rol VARCHAR(20) NOT NULL DEFAULT 'ciudadano' CHECK (rol IN ('ciudadano', 'admin')),
     activo BOOLEAN NOT NULL DEFAULT true,
     fecha_registro TIMESTAMP NOT NULL DEFAULT NOW()

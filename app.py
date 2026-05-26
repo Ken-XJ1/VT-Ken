@@ -288,8 +288,16 @@ def admin_reset_password():
 def auth_registro():
     data = request.get_json(silent=True) or {}
     nombre = (data.get("nombre") or "").strip()
+    apellido = (data.get("apellido") or "").strip()
     email = (data.get("email") or "").strip().lower()
     password = data.get("password") or ""
+    telefono = (data.get("telefono") or "").strip() or None
+    fecha_nacimiento = data.get("fecha_nacimiento") or None
+    genero = data.get("genero") or None
+    direccion = (data.get("direccion") or "").strip() or None
+    barrio = (data.get("barrio") or "").strip() or None
+    municipio_id = data.get("municipio_id") or None
+    ocupacion = (data.get("ocupacion") or "").strip() or None
 
     if not nombre or not email or not password:
         return jsonify({"error": "nombre, email y password son requeridos"}), 400
@@ -303,11 +311,14 @@ def auth_registro():
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO usuarios (nombre, email, password_hash, rol)
-                    VALUES (%s, %s, %s, 'ciudadano')
-                    RETURNING id, nombre, email, rol
+                    INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono, 
+                                        fecha_nacimiento, genero, direccion, barrio, 
+                                        municipio_id, ocupacion, rol)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'ciudadano')
+                    RETURNING id, nombre, apellido, email, rol
                     """,
-                    (nombre, email, password_hash),
+                    (nombre, apellido, email, password_hash, telefono, fecha_nacimiento,
+                     genero, direccion, barrio, municipio_id, ocupacion),
                 )
                 user = serialize_row(cur.fetchone())
             conn.commit()
@@ -874,8 +885,13 @@ def get_perfil():
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT id, nombre, email, rol, activo, fecha_registro
-                    FROM usuarios WHERE id = %s
+                    SELECT u.id, u.nombre, u.apellido, u.email, u.telefono, 
+                           u.fecha_nacimiento, u.genero, u.direccion, u.barrio,
+                           u.municipio_id, u.ocupacion, u.rol, u.activo, u.fecha_registro,
+                           m.nombre AS municipio_nombre
+                    FROM usuarios u
+                    LEFT JOIN municipios m ON m.id = u.municipio_id
+                    WHERE u.id = %s
                     """,
                     (request.current_user["sub"],)
                 )
@@ -893,7 +909,15 @@ def actualizar_perfil():
     """Actualizar perfil del usuario actual"""
     data = request.get_json(silent=True) or {}
     nombre = (data.get("nombre") or "").strip()
+    apellido = (data.get("apellido") or "").strip() or None
     email = (data.get("email") or "").strip().lower()
+    telefono = (data.get("telefono") or "").strip() or None
+    fecha_nacimiento = data.get("fecha_nacimiento") or None
+    genero = data.get("genero") or None
+    direccion = (data.get("direccion") or "").strip() or None
+    barrio = (data.get("barrio") or "").strip() or None
+    municipio_id = data.get("municipio_id") or None
+    ocupacion = (data.get("ocupacion") or "").strip() or None
     password_actual = data.get("password_actual", "")
     password_nueva = data.get("password_nueva", "")
     
@@ -926,22 +950,30 @@ def actualizar_perfil():
                     cur.execute(
                         """
                         UPDATE usuarios 
-                        SET nombre = %s, email = %s, password_hash = %s
+                        SET nombre = %s, apellido = %s, email = %s, telefono = %s,
+                            fecha_nacimiento = %s, genero = %s, direccion = %s, barrio = %s,
+                            municipio_id = %s, ocupacion = %s, password_hash = %s
                         WHERE id = %s
-                        RETURNING id, nombre, email, rol
+                        RETURNING id, nombre, apellido, email, rol
                         """,
-                        (nombre, email, password_hash, request.current_user["sub"])
+                        (nombre, apellido, email, telefono, fecha_nacimiento, genero,
+                         direccion, barrio, municipio_id, ocupacion, password_hash,
+                         request.current_user["sub"])
                     )
                 else:
                     # Actualizar sin cambiar contraseña
                     cur.execute(
                         """
                         UPDATE usuarios 
-                        SET nombre = %s, email = %s
+                        SET nombre = %s, apellido = %s, email = %s, telefono = %s,
+                            fecha_nacimiento = %s, genero = %s, direccion = %s, barrio = %s,
+                            municipio_id = %s, ocupacion = %s
                         WHERE id = %s
-                        RETURNING id, nombre, email, rol
+                        RETURNING id, nombre, apellido, email, rol
                         """,
-                        (nombre, email, request.current_user["sub"])
+                        (nombre, apellido, email, telefono, fecha_nacimiento, genero,
+                         direccion, barrio, municipio_id, ocupacion,
+                         request.current_user["sub"])
                     )
                 
                 result = serialize_row(cur.fetchone())
@@ -953,7 +985,7 @@ def actualizar_perfil():
                     VALUES (%s, %s, %s, %s, %s)
                     """,
                     (request.current_user["sub"], "actualizar_perfil", "usuarios", request.current_user["sub"],
-                     f"Perfil actualizado: {nombre} ({email})" + (" - contraseña cambiada" if password_nueva else ""))
+                     f"Perfil actualizado: {nombre} {apellido or ''} ({email})" + (" - contraseña cambiada" if password_nueva else ""))
                 )
             conn.commit()
         

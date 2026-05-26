@@ -1,15 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registro as apiRegistro } from '../../api/api';
+import { registro as apiRegistro, getMunicipios } from '../../api/api';
 
 export default function Registro() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', confirmar: '' });
+  const [form, setForm] = useState({ 
+    nombre: '', 
+    apellido: '',
+    email: '', 
+    password: '', 
+    confirmar: '',
+    telefono: '',
+    fecha_nacimiento: '',
+    genero: '',
+    direccion: '',
+    barrio: '',
+    municipio_id: '',
+    ocupacion: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [exito, setExito] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmar, setShowConfirmar] = useState(false);
+  const [municipios, setMunicipios] = useState([]);
+
+  useEffect(() => {
+    getMunicipios()
+      .then(setMunicipios)
+      .catch(() => setMunicipios([]));
+  }, []);
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -30,11 +50,20 @@ export default function Registro() {
 
     setLoading(true);
     try {
-      await apiRegistro({
+      const payload = {
         nombre: form.nombre,
+        apellido: form.apellido || null,
         email: form.email,
         password: form.password,
-      });
+        telefono: form.telefono || null,
+        fecha_nacimiento: form.fecha_nacimiento || null,
+        genero: form.genero || null,
+        direccion: form.direccion || null,
+        barrio: form.barrio || null,
+        municipio_id: form.municipio_id ? parseInt(form.municipio_id) : null,
+        ocupacion: form.ocupacion || null,
+      };
+      await apiRegistro(payload);
       setExito(true);
       setTimeout(() => {
         navigate('/login', { replace: true });
@@ -47,8 +76,8 @@ export default function Registro() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-2xl">
         <div className="bg-gray-800 rounded-2xl border border-gray-700 p-8">
           <h1 className="text-2xl font-bold text-white mb-1">Crear cuenta</h1>
           <p className="text-gray-400 text-sm mb-6">Regístrate para reportar síntomas y recibir alertas</p>
@@ -65,89 +94,250 @@ export default function Registro() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="nombre" className="block text-sm font-medium text-gray-300 mb-1">
-                Nombre completo
-              </label>
-              <input
-                id="nombre"
-                name="nombre"
-                type="text"
-                required
-                autoComplete="name"
-                value={form.nombre}
-                onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
-                placeholder="Tu nombre completo"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                Contraseña
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="new-password"
-                  value={form.password}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-red-500 transition-colors"
-                  placeholder="Mínimo 6 caracteres"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                >
-                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Información Personal */}
+            <div className="bg-gray-900/50 rounded-lg p-5 border border-gray-700">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-4">
+                Información Personal
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-300 mb-1">
+                    Nombre <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    id="nombre"
+                    name="nombre"
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    value={form.nombre}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="apellido" className="block text-sm font-medium text-gray-300 mb-1">
+                    Apellido
+                  </label>
+                  <input
+                    id="apellido"
+                    name="apellido"
+                    type="text"
+                    autoComplete="family-name"
+                    value={form.apellido}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="Tu apellido"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="fecha_nacimiento" className="block text-sm font-medium text-gray-300 mb-1">
+                    Fecha de nacimiento
+                  </label>
+                  <input
+                    id="fecha_nacimiento"
+                    name="fecha_nacimiento"
+                    type="date"
+                    autoComplete="bday"
+                    value={form.fecha_nacimiento}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="genero" className="block text-sm font-medium text-gray-300 mb-1">
+                    Género
+                  </label>
+                  <select
+                    id="genero"
+                    name="genero"
+                    value={form.genero}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                    <option value="Prefiero no decir">Prefiero no decir</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="ocupacion" className="block text-sm font-medium text-gray-300 mb-1">
+                    Ocupación
+                  </label>
+                  <input
+                    id="ocupacion"
+                    name="ocupacion"
+                    type="text"
+                    autoComplete="organization-title"
+                    value={form.ocupacion}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="Ej: Estudiante, Docente, Comerciante"
+                  />
+                </div>
               </div>
             </div>
-            <div>
-              <label htmlFor="confirmar" className="block text-sm font-medium text-gray-300 mb-1">
-                Confirmar contraseña
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmar"
-                  name="confirmar"
-                  type={showConfirmar ? 'text' : 'password'}
-                  required
-                  autoComplete="new-password"
-                  value={form.confirmar}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-red-500 transition-colors"
-                  placeholder="Repite tu contraseña"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmar(!showConfirmar)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                >
-                  {showConfirmar ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
+
+            {/* Contacto */}
+            <div className="bg-gray-900/50 rounded-lg p-5 border border-gray-700">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-4">
+                Contacto
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                    Correo electrónico <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="telefono" className="block text-sm font-medium text-gray-300 mb-1">
+                    Teléfono
+                  </label>
+                  <input
+                    id="telefono"
+                    name="telefono"
+                    type="tel"
+                    autoComplete="tel"
+                    value={form.telefono}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="3001234567"
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Ubicación */}
+            <div className="bg-gray-900/50 rounded-lg p-5 border border-gray-700">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-4">
+                Ubicación
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="municipio_id" className="block text-sm font-medium text-gray-300 mb-1">
+                    Municipio
+                  </label>
+                  <select
+                    id="municipio_id"
+                    name="municipio_id"
+                    value={form.municipio_id}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                  >
+                    <option value="">Seleccionar municipio</option>
+                    {municipios.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="barrio" className="block text-sm font-medium text-gray-300 mb-1">
+                    Barrio / Vereda
+                  </label>
+                  <input
+                    id="barrio"
+                    name="barrio"
+                    type="text"
+                    value={form.barrio}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="Nombre del barrio"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="direccion" className="block text-sm font-medium text-gray-300 mb-1">
+                    Dirección
+                  </label>
+                  <input
+                    id="direccion"
+                    name="direccion"
+                    type="text"
+                    autoComplete="street-address"
+                    value={form.direccion}
+                    onChange={handleChange}
+                    className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                    placeholder="Calle, carrera, número"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Seguridad */}
+            <div className="bg-gray-900/50 rounded-lg p-5 border border-gray-700">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-4">
+                Seguridad
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                    Contraseña <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      autoComplete="new-password"
+                      value={form.password}
+                      onChange={handleChange}
+                      className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                    >
+                      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="confirmar" className="block text-sm font-medium text-gray-300 mb-1">
+                    Confirmar contraseña <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="confirmar"
+                      name="confirmar"
+                      type={showConfirmar ? 'text' : 'password'}
+                      required
+                      autoComplete="new-password"
+                      value={form.confirmar}
+                      onChange={handleChange}
+                      className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:border-red-500 transition-colors"
+                      placeholder="Repite tu contraseña"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmar(!showConfirmar)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                    >
+                      {showConfirmar ? <EyeOffIcon /> : <EyeIcon />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading || exito}
