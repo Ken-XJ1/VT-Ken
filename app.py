@@ -395,6 +395,23 @@ def auth_registro():
                 user = serialize_row(cur.fetchone())
             conn.commit()
         token = create_token(user["id"], user["nombre"], user["email"], user["rol"])
+        # Registrar nuevo registro en auditoría
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+        try:
+            with get_db() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles, ip_address)
+                        VALUES (%s, 'registro', 'usuarios', %s, %s, %s)
+                        """,
+                        (user["id"], user["id"],
+                         f"Nuevo usuario registrado: {user['nombre']} ({user['email']})",
+                         ip or None),
+                    )
+                conn.commit()
+        except psycopg2.Error:
+            pass  # No bloquear el registro si falla la auditoría
         return jsonify({"token": token, "user": user}), 201
     except psycopg2.errors.UniqueViolation:
         return jsonify({"error": "El email ya está registrado"}), 409
@@ -428,6 +445,24 @@ def auth_login():
         return jsonify({"error": "Cuenta desactivada. Contacta al administrador"}), 403
     if not bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
         return jsonify({"error": "Credenciales incorrectas"}), 401
+
+    # Registrar inicio de sesión en auditoría
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles, ip_address)
+                    VALUES (%s, 'login', 'usuarios', %s, %s, %s)
+                    """,
+                    (user["id"], user["id"],
+                     f"Inicio de sesión: {user['nombre']} ({user['email']}) — rol: {user['rol']}",
+                     ip or None),
+                )
+            conn.commit()
+    except psycopg2.Error:
+        pass  # No bloquear el login si falla la auditoría
 
     token = create_token(user["id"], user["nombre"], user["email"], user["rol"])
     return jsonify({
