@@ -3,19 +3,16 @@ import './Landing.css';
 
 const FEATURES = [
   {
-    icon: '🗺️',
     title: 'Mapa interactivo',
     desc: 'Brotes georreferenciados con filtros por municipio y enfermedad en el Chocó.',
     to: '/mapa',
   },
   {
-    icon: '📊',
     title: 'Predicción de riesgo',
     desc: 'Probabilidad por enfermedad y panel climático integrado al modelo.',
     to: '/prediccion',
   },
   {
-    icon: '🦟',
     title: 'Fichas clínicas',
     desc: 'Síntomas, transmisión y prevención de dengue, malaria, zika y chikungunya.',
     to: '/enfermedades',
@@ -93,7 +90,6 @@ export default function Landing() {
           <div className="features-grid">
             {FEATURES.map((f) => (
               <Link key={f.to} to={f.to} className="feature-card">
-                <span className="feature-icon">{f.icon}</span>
                 <h3>{f.title}</h3>
                 <p>{f.desc}</p>
               </Link>

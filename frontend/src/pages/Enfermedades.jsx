@@ -7,28 +7,24 @@ const DISEASE_STYLES = {
     accent: 'bg-red-500', 
     badge: 'bg-red-900/40 text-red-300',
     gradient: 'from-red-900/20 to-transparent',
-    icon: '🦟'
   },
   Malaria: { 
     border: 'border-orange-500', 
     accent: 'bg-orange-500', 
     badge: 'bg-orange-900/40 text-orange-300',
     gradient: 'from-orange-900/20 to-transparent',
-    icon: '🦟'
   },
   Zika: { 
     border: 'border-blue-500', 
     accent: 'bg-blue-500', 
     badge: 'bg-blue-900/40 text-blue-300',
     gradient: 'from-blue-900/20 to-transparent',
-    icon: '🦟'
   },
   Chikungunya: { 
     border: 'border-green-500', 
     accent: 'bg-green-500', 
     badge: 'bg-green-900/40 text-green-300',
     gradient: 'from-green-900/20 to-transparent',
-    icon: '🦟'
   },
 };
 
@@ -150,15 +146,12 @@ export default function Enfermedades() {
             </p>
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700">
-                <span className="text-emerald-400 text-xl">🦟</span>
                 <span className="text-gray-300">Transmisión vectorial</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700">
-                <span className="text-emerald-400 text-xl">🏥</span>
                 <span className="text-gray-300">Vigilancia activa</span>
               </div>
               <div className="flex items-center gap-2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700">
-                <span className="text-emerald-400 text-xl">📊</span>
                 <span className="text-gray-300">Datos actualizados</span>
               </div>
             </div>
@@ -201,14 +194,11 @@ export default function Enfermedades() {
                 {/* Header con gradiente */}
                 <div className={`bg-gradient-to-r ${style.gradient} p-6 border-b border-gray-700`}>
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl">{style.icon}</span>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">{e.nombre}</h2>
-                        <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full mt-2 ${style.badge}`}>
-                          Enfermedad tropical
-                        </span>
-                      </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{e.nombre}</h2>
+                      <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full mt-2 ${style.badge}`}>
+                        Enfermedad tropical
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -253,7 +243,7 @@ export default function Enfermedades() {
                   {/* Transmisión */}
                   <div className="bg-orange-900/10 rounded-lg p-4 border border-orange-900/30">
                     <h4 className="text-xs font-semibold text-orange-400 uppercase tracking-wide mb-2">
-                      🦟 Transmisión
+                      Transmisión
                     </h4>
                     <p className="text-gray-300 text-sm leading-relaxed">{e.transmision}</p>
                   </div>
@@ -290,7 +280,7 @@ export default function Enfermedades() {
                           color="text-red-400"
                         />
                         <InfoBlock
-                          icon={<span className="text-sm">👥</span>}
+                          icon={<UsersIcon className="w-4 h-4" />}
                           title="Población en riesgo"
                           content={extra.poblacion_riesgo}
                           color="text-yellow-400"
@@ -311,14 +301,14 @@ export default function Enfermedades() {
 
                       <div className="bg-gray-900/70 rounded-lg p-4 border border-gray-700">
                         <h5 className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-2">
-                          ⚠️ Complicaciones posibles
+                          Complicaciones posibles
                         </h5>
                         <p className="text-gray-300 text-sm leading-relaxed">{extra.complicaciones}</p>
                       </div>
 
                       <div className="bg-emerald-900/20 rounded-lg p-4 border border-emerald-900/30">
                         <h5 className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-2">
-                          📊 Contexto epidemiológico - Chocó
+                          Contexto epidemiológico — Chocó
                         </h5>
                         <p className="text-gray-300 text-sm leading-relaxed">{extra.estadisticas}</p>
                       </div>
@@ -335,21 +325,18 @@ export default function Enfermedades() {
           <h2 className="text-2xl font-bold text-white mb-4">Recomendaciones generales</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <div className="text-3xl mb-2">🏥</div>
               <h3 className="text-white font-semibold">Atención médica</h3>
               <p className="text-gray-400 text-sm">
                 Ante cualquier síntoma, acude inmediatamente al centro de salud más cercano. El diagnóstico temprano salva vidas.
               </p>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl mb-2">🦟</div>
               <h3 className="text-white font-semibold">Control de vectores</h3>
               <p className="text-gray-400 text-sm">
                 Elimina criaderos de agua estancada, usa mosquiteros y repelente. La prevención es la mejor estrategia.
               </p>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl mb-2">📱</div>
               <h3 className="text-white font-semibold">Reporta casos</h3>
               <p className="text-gray-400 text-sm">
                 Usa nuestro sistema para reportar síntomas. Tu información ayuda a la vigilancia epidemiológica del Chocó.
@@ -372,5 +359,13 @@ function InfoBlock({ icon, title, content, color }) {
       </div>
       <p className="text-gray-300 text-sm leading-relaxed">{content}</p>
     </div>
+  );
+}
+
+function UsersIcon({ className }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
   );
 }

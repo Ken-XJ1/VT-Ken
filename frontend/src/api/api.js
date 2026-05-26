@@ -197,3 +197,11 @@ export function getPerfil() {
 export function actualizarPerfil(data) {
   return putAuth('/api/perfil', data);
 }
+
+export function actualizarEmail(data) {
+  return putAuth('/api/perfil/email', data);
+}
+
+export function actualizarPassword(data) {
+  return putAuth('/api/perfil/password', data);
+}
