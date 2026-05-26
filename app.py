@@ -906,11 +906,10 @@ def get_perfil():
 @app.put("/api/perfil")
 @require_auth()
 def actualizar_perfil():
-    """Actualizar perfil del usuario actual"""
+    """Actualizar perfil del usuario actual - información personal y ubicación"""
     data = request.get_json(silent=True) or {}
     nombre = (data.get("nombre") or "").strip()
     apellido = (data.get("apellido") or "").strip() or None
-    email = (data.get("email") or "").strip().lower()
     telefono = (data.get("telefono") or "").strip() or None
     fecha_nacimiento = data.get("fecha_nacimiento") or None
     genero = data.get("genero") or None
@@ -918,64 +917,26 @@ def actualizar_perfil():
     barrio = (data.get("barrio") or "").strip() or None
     municipio_id = data.get("municipio_id") or None
     ocupacion = (data.get("ocupacion") or "").strip() or None
-    password_actual = data.get("password_actual", "")
-    password_nueva = data.get("password_nueva", "")
     
-    if not nombre or not email:
-        return jsonify({"error": "nombre y email son requeridos"}), 400
+    if not nombre:
+        return jsonify({"error": "El nombre es requerido"}), 400
     
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
-                # Obtener datos actuales
                 cur.execute(
-                    "SELECT password_hash FROM usuarios WHERE id = %s",
-                    (request.current_user["sub"],)
+                    """
+                    UPDATE usuarios 
+                    SET nombre = %s, apellido = %s, telefono = %s,
+                        fecha_nacimiento = %s, genero = %s, direccion = %s, barrio = %s,
+                        municipio_id = %s, ocupacion = %s
+                    WHERE id = %s
+                    RETURNING id, nombre, apellido, email, rol
+                    """,
+                    (nombre, apellido, telefono, fecha_nacimiento, genero,
+                     direccion, barrio, municipio_id, ocupacion,
+                     request.current_user["sub"])
                 )
-                user = cur.fetchone()
-                if not user:
-                    return jsonify({"error": "Usuario no encontrado"}), 404
-                
-                # Si quiere cambiar contraseña, verificar la actual
-                if password_nueva:
-                    if not password_actual:
-                        return jsonify({"error": "Debes proporcionar tu contraseña actual"}), 400
-                    if not bcrypt.checkpw(password_actual.encode(), user["password_hash"].encode()):
-                        return jsonify({"error": "Contraseña actual incorrecta"}), 401
-                    if len(password_nueva) < 6:
-                        return jsonify({"error": "La nueva contraseña debe tener al menos 6 caracteres"}), 400
-                    
-                    # Actualizar con nueva contraseña
-                    password_hash = bcrypt.hashpw(password_nueva.encode(), bcrypt.gensalt()).decode()
-                    cur.execute(
-                        """
-                        UPDATE usuarios 
-                        SET nombre = %s, apellido = %s, email = %s, telefono = %s,
-                            fecha_nacimiento = %s, genero = %s, direccion = %s, barrio = %s,
-                            municipio_id = %s, ocupacion = %s, password_hash = %s
-                        WHERE id = %s
-                        RETURNING id, nombre, apellido, email, rol
-                        """,
-                        (nombre, apellido, email, telefono, fecha_nacimiento, genero,
-                         direccion, barrio, municipio_id, ocupacion, password_hash,
-                         request.current_user["sub"])
-                    )
-                else:
-                    # Actualizar sin cambiar contraseña
-                    cur.execute(
-                        """
-                        UPDATE usuarios 
-                        SET nombre = %s, apellido = %s, email = %s, telefono = %s,
-                            fecha_nacimiento = %s, genero = %s, direccion = %s, barrio = %s,
-                            municipio_id = %s, ocupacion = %s
-                        WHERE id = %s
-                        RETURNING id, nombre, apellido, email, rol
-                        """,
-                        (nombre, apellido, email, telefono, fecha_nacimiento, genero,
-                         direccion, barrio, municipio_id, ocupacion,
-                         request.current_user["sub"])
-                    )
-                
                 result = serialize_row(cur.fetchone())
                 
                 # Registrar en auditoría
@@ -985,7 +946,66 @@ def actualizar_perfil():
                     VALUES (%s, %s, %s, %s, %s)
                     """,
                     (request.current_user["sub"], "actualizar_perfil", "usuarios", request.current_user["sub"],
-                     f"Perfil actualizado: {nombre} {apellido or ''} ({email})" + (" - contraseña cambiada" if password_nueva else ""))
+                     f"Información personal actualizada: {nombre} {apellido or ''}")
+                )
+            conn.commit()
+        
+        # Generar nuevo token con datos actualizados
+        token = create_token(result["id"], result["nombre"], result["email"], result["rol"])
+        return jsonify({"token": token, "user": result})
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/perfil/email")
+@require_auth()
+def actualizar_email():
+    """Actualizar email del usuario"""
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    password_actual = data.get("password_actual", "")
+    
+    if not email:
+        return jsonify({"error": "El email es requerido"}), 400
+    
+    if not password_actual:
+        return jsonify({"error": "Debes proporcionar tu contraseña actual"}), 400
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Verificar contraseña
+                cur.execute(
+                    "SELECT password_hash FROM usuarios WHERE id = %s",
+                    (request.current_user["sub"],)
+                )
+                user = cur.fetchone()
+                if not user:
+                    return jsonify({"error": "Usuario no encontrado"}), 404
+                
+                if not bcrypt.checkpw(password_actual.encode(), user["password_hash"].encode()):
+                    return jsonify({"error": "Contraseña incorrecta"}), 401
+                
+                # Actualizar email
+                cur.execute(
+                    """
+                    UPDATE usuarios 
+                    SET email = %s
+                    WHERE id = %s
+                    RETURNING id, nombre, apellido, email, rol
+                    """,
+                    (email, request.current_user["sub"])
+                )
+                result = serialize_row(cur.fetchone())
+                
+                # Registrar en auditoría
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (request.current_user["sub"], "actualizar_email", "usuarios", request.current_user["sub"],
+                     f"Email actualizado a: {email}")
                 )
             conn.commit()
         
@@ -994,6 +1014,58 @@ def actualizar_perfil():
         return jsonify({"token": token, "user": result})
     except psycopg2.errors.UniqueViolation:
         return jsonify({"error": "El email ya está registrado"}), 409
+    except psycopg2.Error as e:
+        return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
+
+
+@app.put("/api/perfil/password")
+@require_auth()
+def actualizar_password():
+    """Actualizar contraseña del usuario"""
+    data = request.get_json(silent=True) or {}
+    password_actual = data.get("password_actual", "")
+    password_nueva = data.get("password_nueva", "")
+    
+    if not password_actual or not password_nueva:
+        return jsonify({"error": "Debes proporcionar la contraseña actual y la nueva"}), 400
+    
+    if len(password_nueva) < 6:
+        return jsonify({"error": "La nueva contraseña debe tener al menos 6 caracteres"}), 400
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Verificar contraseña actual
+                cur.execute(
+                    "SELECT password_hash FROM usuarios WHERE id = %s",
+                    (request.current_user["sub"],)
+                )
+                user = cur.fetchone()
+                if not user:
+                    return jsonify({"error": "Usuario no encontrado"}), 404
+                
+                if not bcrypt.checkpw(password_actual.encode(), user["password_hash"].encode()):
+                    return jsonify({"error": "Contraseña actual incorrecta"}), 401
+                
+                # Actualizar contraseña
+                password_hash = bcrypt.hashpw(password_nueva.encode(), bcrypt.gensalt()).decode()
+                cur.execute(
+                    "UPDATE usuarios SET password_hash = %s WHERE id = %s",
+                    (password_hash, request.current_user["sub"])
+                )
+                
+                # Registrar en auditoría
+                cur.execute(
+                    """
+                    INSERT INTO auditoria (usuario_id, accion, tabla_afectada, registro_id, detalles)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (request.current_user["sub"], "actualizar_password", "usuarios", request.current_user["sub"],
+                     "Contraseña actualizada")
+                )
+            conn.commit()
+        
+        return jsonify({"message": "Contraseña actualizada correctamente"})
     except psycopg2.Error as e:
         return jsonify({"error": "Error de base de datos", "detail": str(e)}), 500
 
