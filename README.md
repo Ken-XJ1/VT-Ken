@@ -320,12 +320,7 @@ El sistema está optimizado para:
 
 Este proyecto está bajo licencia MIT License - ver archivo LICENSE para detalles.
 
-## Contacto
 
-- **Desarrollador Principal**: [Nombre del desarrollador]
-- **Email**: [email de contacto]
-- **Institución**: [Nombre de la institución]
-- **Teléfono**: [+57 XXX XXX XXXX]
 
 ##  Agradecimientos
 
