@@ -16,9 +16,11 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
-CORS(app)
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-cambiar-en-produccion")
+configured_secret_key = os.environ.get("SECRET_KEY")
+if os.environ.get("RENDER") == "true" and not configured_secret_key:
+    raise RuntimeError("SECRET_KEY debe configurarse en el entorno de producción.")
+SECRET_KEY = configured_secret_key or "dev-secret-key-cambiar-en-produccion"
 JWT_EXPIRY_HOURS = 24
 
 DB_CONFIG = {
@@ -31,6 +33,13 @@ if os.environ.get("PGPORT"):
     DB_CONFIG["port"] = os.environ["PGPORT"]
 if os.environ.get("PGPASSWORD"):
     DB_CONFIG["password"] = os.environ["PGPASSWORD"]
+
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ORIGINS", "*").split(",")
+    if origin.strip()
+]
+CORS(app, origins=CORS_ORIGINS)
 
 
 def get_db():
@@ -338,18 +347,6 @@ def health():
         return jsonify({"status": "ok", "database": "connected"})
     except psycopg2.Error as e:
         return jsonify({"status": "error", "database": str(e)}), 503
-
-
-@app.get("/api/admin/reset-password")
-def admin_reset_password():
-    """Endpoint temporal de desarrollo para generar hash de contraseña"""
-    password = "Tropical2026"
-    hash_generated = bcrypt.hashpw(password.encode(), bcrypt.gensalt(12)).decode()
-    return jsonify({
-        "password": password,
-        "hash": hash_generated,
-        "note": "Usar este hash en schema.sql o ejecutar UPDATE directo en BD"
-    })
 
 
 # ---------------------------------------------------------------------------
@@ -1214,4 +1211,4 @@ def get_ip():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)

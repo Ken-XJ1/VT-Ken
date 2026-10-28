@@ -1,10 +1,10 @@
 services:
   # Backend Flask API
   - type: web
-    name: vigilancia-tropical-api
+    name: vigilancia-tropical-api-staging
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PGDATABASE
         sync: false
@@ -18,12 +18,14 @@ services:
         sync: false
       - key: SECRET_KEY
         sync: false
+      - key: CORS_ORIGINS
+        sync: false
 
   # Frontend React (static site)
   - type: web
-    name: vigilancia-tropical-ui
+    name: vigilancia-tropical-ui-staging
     runtime: static
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm ci && npm run build
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
