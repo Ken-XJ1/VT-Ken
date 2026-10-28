@@ -119,6 +119,16 @@ npm run build
 
 Las rutas protegidas requieren un JWT en `Authorization: Bearer <token>`.
 
+## Pruebas automáticas de la API
+
+Las pruebas unitarias no requieren conectarse a PostgreSQL:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Cubren validación de registro y mensajes, inicio de sesión, autorización por rol, expiración de JWT, aislamiento del historial de reportes y respuesta de salud ante errores de base de datos.
+
 ## Sobre las predicciones y el modelo
 
 La pantalla `/prediccion` obtiene sus resultados de PostgreSQL. El endpoint de Flask usa predicciones almacenadas y, cuando faltan, aplica una regla basada en casos recientes; no invoca el modelo de `model/predictive_model.py`. Ese módulo es un prototipo separado y no forma parte del flujo de la aplicación actual.

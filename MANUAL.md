@@ -97,6 +97,16 @@ Invoke-RestMethod http://127.0.0.1:5000/api/health
 
 La respuesta correcta debe indicar que el estado es `ok` y la base de datos está `connected`.
 
+## Ejecutar pruebas unitarias
+
+Desde la carpeta raíz del proyecto:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Estas pruebas usan el cliente de prueba de Flask y no leen ni modifican la base local.
+
 ## Linux/Fedora
 
 El proceso es el mismo, pero los comandos cambian:

@@ -4,12 +4,12 @@ import StatCard from '../components/StatCard';
 const FEATURES = [
   {
     title: 'Mapa interactivo',
-    desc: 'Brotes georreferenciados con filtros por municipio y enfermedad en el Chocó.',
+    desc: 'Registros de demostración georreferenciados con filtros por municipio y enfermedad.',
     to: '/mapa',
   },
   {
     title: 'Predicción de riesgo',
-    desc: 'Probabilidad por enfermedad y panel climático integrado al modelo.',
+    desc: 'Indicador orientativo calculado con registros de demostración; no es un pronóstico clínico.',
     to: '/prediccion',
   },
   {
@@ -25,10 +25,10 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { valor: '4', etiqueta: 'Enfermedades vigiladas' },
-  { valor: '2', etiqueta: 'Municipios monitoreados' },
-  { valor: '85%', etiqueta: 'Precisión del modelo' },
-  { valor: '24/7', etiqueta: 'Actualización continua' },
+  { valor: '4', etiqueta: 'Enfermedades descritas' },
+  { valor: '2', etiqueta: 'Municipios con datos de muestra' },
+  { valor: 'Demo', etiqueta: 'Datos epidemiológicos y clima' },
+  { valor: 'No', etiqueta: 'Conexión a datos en tiempo real' },
 ];
 
 const MUNICIPIOS = [
@@ -47,9 +47,9 @@ const MUNICIPIOS = [
 ];
 
 const PASOS = [
-  { num: 1, titulo: 'Reporta síntomas', desc: 'Ciudadanos envían reportes de síntomas sospechosos' },
-  { num: 2, titulo: 'Análisis predictivo', desc: 'El sistema analiza datos climáticos y epidemiológicos' },
-  { num: 3, titulo: 'Alertas tempranas', desc: 'Generamos alertas de riesgo para prevenir brotes' },
+  { num: 1, titulo: 'Consulta registros', desc: 'Explora brotes de demostración por municipio y enfermedad' },
+  { num: 2, titulo: 'Revisa el indicador', desc: 'Consulta el nivel orientativo calculado desde los datos disponibles' },
+  { num: 3, titulo: 'Infórmate', desc: 'Conoce síntomas y medidas generales de prevención' },
 ];
 
 export default function Inicio() {
@@ -70,8 +70,9 @@ export default function Inicio() {
               </span>
             </h1>
             <p className="text-[#9ca3af] text-lg mb-8 leading-relaxed">
-              Vigilancia en tiempo real para dengue, malaria, zika y chikungunya en
-              Quibdó e Istmina. Datos SIVIGILA, clima y predicción de riesgo.
+              Explora información de dengue, malaria, zika y chikungunya en Quibdó
+              e Istmina. Esta versión usa datos de demostración y no ofrece
+              vigilancia epidemiológica en tiempo real.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -173,14 +174,49 @@ export default function Inicio() {
         </div>
       </section>
 
+      {/* Fuentes y alcance de los datos */}
+      <section className="py-16 px-4 bg-[#111827]">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-[#f9fafb] tracking-tight mb-3">
+            Fuentes y alcance de los datos
+          </h2>
+          <p className="text-[#9ca3af] leading-relaxed mb-6">
+            Los registros epidemiológicos y climáticos que muestra esta versión
+            son datos de demostración cargados en la base de datos. El sistema
+            todavía no consulta en vivo al INS, IDEAM ni Open-Meteo. Los siguientes
+            enlaces son fuentes de referencia, no indican una integración activa.
+            No uses estos datos para tomar decisiones médicas o de salud pública.
+          </p>
+          <ul className="flex flex-wrap gap-3 text-sm">
+            {[
+              { label: 'INS — Instituto Nacional de Salud', href: 'https://www.ins.gov.co/' },
+              { label: 'IDEAM', href: 'https://www.ideam.gov.co/' },
+              { label: 'Open-Meteo', href: 'https://open-meteo.com/' },
+              { label: 'OpenStreetMap — derechos de autor', href: 'https://www.openstreetmap.org/copyright' },
+            ].map((source) => (
+              <li key={source.href}>
+                <a
+                  href={source.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex rounded-lg border border-gray-700 px-4 py-2 text-emerald-300 hover:border-emerald-500 hover:text-emerald-200 transition-colors"
+                >
+                  {source.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 px-4 bg-[#111827]">
         <div className="max-w-2xl mx-auto text-center bg-gradient-to-br from-emerald-900/20 to-teal-900/20 rounded-2xl p-10 border border-emerald-700/30">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#f9fafb] tracking-tight mb-3">
-            ¿Listo para explorar los datos?
+            ¿Listo para explorar la demostración?
           </h2>
           <p className="text-[#9ca3af] mb-6">
-            Accede al mapa interactivo y las predicciones de riesgo actualizadas.
+            Accede al mapa interactivo y al indicador de riesgo orientativo.
           </p>
           <Link
             to="/mapa"

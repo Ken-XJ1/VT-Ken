@@ -4,6 +4,7 @@ Conexión PostgreSQL: usuario kenneth_dev, base vigilancia_tropical
 """
 
 import os
+import re
 from datetime import date, datetime, timezone, timedelta
 from decimal import Decimal
 from functools import wraps
@@ -370,6 +371,8 @@ def auth_registro():
 
     if not nombre or not email or not password:
         return jsonify({"error": "nombre, email y password son requeridos"}), 400
+    if len(email) > 150 or not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        return jsonify({"error": "El email no tiene un formato válido"}), 400
     if len(password) < 6:
         return jsonify({"error": "La contraseña debe tener al menos 6 caracteres"}), 400
 
